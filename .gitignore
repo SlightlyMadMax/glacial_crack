@@ -40,12 +40,6 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 
-# local files
-.env*
-db.sqlite3
-cert.pem
-key.pem
-config.xml
-
+# idea
 .idea/
 */logs/

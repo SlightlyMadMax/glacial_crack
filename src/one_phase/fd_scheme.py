@@ -4,13 +4,22 @@ import numpy as np
 
 
 def predict_correct(T, F_new, F_old, dx, dy):
+    """
+    Расчёт температуры в новых координатах на новом шаге по времени с помощью схемы предиктор-корректор.
+    T – значения температуры на сетке в НОВЫХ координатах
+    F_new – положение границы фазового перехода
+    F_old – положение границы фазового перехода на предыдущем шаге по времени
+    dx – шаг по x на сетке в новых координатах
+    dy – шаг по y на сетке в новых координатах
+    """
+
     temp_T = np.copy(T)
     new_T = np.copy(T)
 
     # ПРЕДСКАЗАНИЕ ПО X
     for k in range(1, N_Y - 1):
-        alpha_0 = 0  # из левого граничного условия по x
-        beta_0 = T_ice / T_0  # из левого граничного условия по x
+        alpha_0 = 0  # Из левого граничного условия по x
+        beta_0 = T_ice / T_0  # Из левого граничного условия по x
 
         a = c = np.ones((N_X - 1,)) * (-dt / (2 * dx ** 2))
         b = np.ones((N_X - 1,)) * (1 + dt / (dx ** 2))
@@ -25,12 +34,11 @@ def predict_correct(T, F_new, F_old, dx, dy):
             c=c,
             f=T[k, :]
         )
-        # print('New_T_y difference = ' + str(new_T_y-T[k, :]))
 
     # ПРЕДСКАЗАНИЕ ПО Y
     for j in range(1, N_X - 1):
-        alpha_0 = 0  # из левого граничного условия по y
-        beta_0 = T_ice / T_0  # из левого граничного условия по y
+        alpha_0 = 0  # Из левого граничного условия по y
+        beta_0 = T_ice / T_0  # Из левого граничного условия по y
         a_y = np.empty((N_Y - 1), )
         b_y = np.empty((N_Y - 1), )
         c_y = np.empty((N_Y - 1), )
@@ -66,8 +74,6 @@ def predict_correct(T, F_new, F_old, dx, dy):
             m_3 = kappa_k * (temp_T[k + 1, j] - temp_T[k - 1, j]) / (2.0 * dy)
             m_4 = 2*y*(F_new[j + 1] - F_new[j - 1])*(temp_T[k+1, j+1] - temp_T[k+1, j-1] - temp_T[k-1, j+1] +
                                                      temp_T[k-1, j-1])/(F_new[j]*8*dx**2*dy)
-            # if j == 1 or j == N_X - 1:
-            #     m_1 = 0
             new_T[k, j] = T[k, j] + dt * (m_1 + m_2 + m_3 - m_4)
 
     return temp_T

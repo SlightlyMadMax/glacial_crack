@@ -3,10 +3,10 @@ import numpy as np
 
 def tdma(alpha_0, beta_0, u_r, a, b, c, f):
     """
-    Tridiagonal matrix algorithm.
-    Here alpha_0 and beta_0 are starting coefficients,
-    a – lower diagonal, b – main diagonal, c – upper diagonal,
-    f – right side vector
+    Алгоритм прогонки.
+    Здесь alpha_0 и beta_0 начальные прогоночные коэффициенты,
+    a – нижняя диагональ, b – главная диагональ, c – верхняя диагональ,
+    f – вектор правой части
     """
     n = len(f)
     alpha = np.zeros(n - 1, float)

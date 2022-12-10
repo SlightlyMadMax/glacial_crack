@@ -1,34 +1,49 @@
 import numpy as np
 from parameters import *
-from one_phase.fd_scheme import predict_correct
 
 
 def init_f_vector(x):
+    """
+    Задание начального положения границы фазового перехода.
+    x – вектор координаты x для заданной области
+    """
     n_x = len(x)
     F = np.empty(n_x)
     for i in range(0, n_x):
-        F[i] = h if x[i] <= s else x[i] + h - s
-        # F[i] = h + x[i]*x[i]
+        F[i] = h + 2*x[i]*x[i]  # Парабола f(x, t=0) = 2*x^2 + h
     return F
 
 
 def init_temperature():
+    """
+    Задание начального распределения температуры на сетке в НОВЫХ координатах.
+    """
     T = np.empty((N_Y, N_X))
-    T[:, :] = T_ice/T_0
-    T[N_Y-1, :] = T_0/T_0
+    T[:, :] = T_ice/T_0  # Температура льда
+    T[N_Y-1, :] = T_0/T_0  # Температура фазового перехода
     return T
 
 
 def recalculate_boundary(F, T, dy):
-    # print((3.0*T[N_Y-1, :] - 4*T[N_Y-2, :] + T[N_Y-3, :]))
+    """
+    Пересчёт положение границы фазового перехода в соответствии с условием Стефана в новых координатах.
+    F – вектор значений положения границы фазового перехода.
+    T – матрица значений температуры на сетке в НОВЫХ координатах.
+    dy – шаг по y на сетке в НОВЫХ координатах.
+    """
     F[:] = F[:] + k_ice*dt*(3.0*T[N_Y-1, :] - 4*T[N_Y-2, :] + T[N_Y-3, :])/(2*dy*gamma*F[:])
-    # print(k_ice*(T_0/T_0 - T[N_Y-2, :])*dt/(2*dy*gamma*F[:]))
     return F
 
 
-def recalculate_temperature(T, F, dx, dy):
-    F_old = np.copy(F)
-    F_new = recalculate_boundary(F=np.copy(F_old), T=T, dy=dy)
-    T_new = predict_correct(T, F_new, F_old, dx=dx, dy=dy)
+def reverse_transform(T, F):
+    """
+    Пересчёт температуры в исходные координаты.
+    T – матрица значений температуры на сетке в НОВЫХ координатах.
+    F – вектор значений положения границы фазового перехода.
+    """
+    T_new = np.zeros((int(0.1*N_Y), N_X))
+    for j in range(0, N_Y):
+        for i in range(0, N_X):
+            T_new[int(j*F[i]), i] = T_0*(T[j, i] - 1)  # Пересчитываем в ИСХОДНЫЕ координаты и переходим к °С
+    return T_new
 
-    return T_new, F_new
