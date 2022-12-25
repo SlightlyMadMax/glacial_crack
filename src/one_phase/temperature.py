@@ -41,7 +41,7 @@ def reverse_transform(T, F):
     T – матрица значений температуры на сетке в НОВЫХ координатах.
     F – вектор значений положения границы фазового перехода.
     """
-    T_new = np.zeros((int(0.1*N_Y), N_X))
+    T_new = np.zeros((int(H*N_Y), N_X))
     for j in range(0, N_Y):
         for i in range(0, N_X):
             T_new[int(j*F[i]), i] = T_0*(T[j, i] - 1)  # Пересчитываем в ИСХОДНЫЕ координаты и переходим к °С
