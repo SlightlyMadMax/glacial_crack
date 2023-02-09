@@ -16,14 +16,14 @@ def predict_correct(T, F_new, F_old, dx, dy):
     temp_T = np.copy(T)
     new_T = np.copy(T)
 
+    alpha_0 = 0  # Из левого граничного условия по x
+    beta_0 = T_ice / T_0  # Из левого граничного условия по x
+
+    a = c = np.ones((N_X - 1,)) * (-dt / (2 * dx ** 2))
+    b = np.ones((N_X - 1,)) * (1 + dt / (dx ** 2))
+
     # ПРЕДСКАЗАНИЕ ПО X
     for k in range(1, N_Y - 1):
-        alpha_0 = 0  # Из левого граничного условия по x
-        beta_0 = T_ice / T_0  # Из левого граничного условия по x
-
-        a = c = np.ones((N_X - 1,)) * (-dt / (2 * dx ** 2))
-        b = np.ones((N_X - 1,)) * (1 + dt / (dx ** 2))
-
         # ПРОГОНКА
         temp_T[k, :] = tdma(
             alpha_0=alpha_0,
@@ -35,14 +35,14 @@ def predict_correct(T, F_new, F_old, dx, dy):
             f=T[k, :]
         )
 
+    alpha_0 = 0  # Из левого граничного условия по y
+    beta_0 = T_ice / T_0  # Из левого граничного условия по y
+    a_y = np.empty((N_Y - 1), )
+    b_y = np.empty((N_Y - 1), )
+    c_y = np.empty((N_Y - 1), )
+
     # ПРЕДСКАЗАНИЕ ПО Y
     for j in range(1, N_X - 1):
-        alpha_0 = 0  # Из левого граничного условия по y
-        beta_0 = T_ice / T_0  # Из левого граничного условия по y
-        a_y = np.empty((N_Y - 1), )
-        b_y = np.empty((N_Y - 1), )
-        c_y = np.empty((N_Y - 1), )
-
         for k in range(0, N_Y - 1):
             y = k*dy
             kappa_k = y*((F_new[j] - F_old[j])/dt + 2*((F_new[j + 1] - F_new[j - 1])/(2*dx))**2 -
