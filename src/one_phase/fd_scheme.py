@@ -22,6 +22,10 @@ def predict_correct(T, F_new, F_old, dx, dy):
     a = c = np.ones((N_X - 1,)) * (-dt / (2 * dx ** 2))
     b = np.ones((N_X - 1,)) * (1 + dt / (dx ** 2))
 
+    a_y = np.empty((N_Y - 1), )
+    b_y = np.empty((N_Y - 1), )
+    c_y = np.empty((N_Y - 1), )
+
     # ПРЕДСКАЗАНИЕ ПО X
     for k in range(1, N_Y - 1):
         # ПРОГОНКА
@@ -34,12 +38,6 @@ def predict_correct(T, F_new, F_old, dx, dy):
             c=c,
             f=T[k, :]
         )
-
-    alpha_0 = 0  # Из левого граничного условия по y
-    beta_0 = T_ice / T_0  # Из левого граничного условия по y
-    a_y = np.empty((N_Y - 1), )
-    b_y = np.empty((N_Y - 1), )
-    c_y = np.empty((N_Y - 1), )
 
     # ПРЕДСКАЗАНИЕ ПО Y
     for j in range(1, N_X - 1):
