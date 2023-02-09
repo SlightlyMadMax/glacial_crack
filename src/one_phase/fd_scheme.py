@@ -43,9 +43,8 @@ def predict_correct(T, F_new, F_old, dx, dy):
     for j in range(1, N_X - 1):
         for k in range(0, N_Y - 1):
             y = k*dy
-            kappa_k = y*((F_new[j] - F_old[j])/dt + 2*((F_new[j + 1] - F_new[j - 1])/(2*dx))**2 -
-                         (F_new[j + 1] - 2*F_new[j] + F_new[j - 1])/dx**2)/F_new[j]
-            sigma_k = (1 / F_new[j]) ** 2 + (y*(F_new[j + 1] - F_new[j - 1])/(2 * dx * F_new[j])) ** 2
+            kappa_k = y*((F_new[j] - F_old[j])/dt)/F_new[j]
+            sigma_k = (1 / F_new[j]) ** 2
             a_y[k] = -dt * (kappa_k / (4 * dy) + sigma_k / (2 * dy ** 2))
             b_y[k] = 1 + dt * sigma_k / (dy ** 2)
             c_y[k] = dt * (kappa_k / (4 * dy) - sigma_k / (2 * dy ** 2))
@@ -64,14 +63,11 @@ def predict_correct(T, F_new, F_old, dx, dy):
     for k in range(1, N_Y - 1):
         y = k*dy
         for j in range(1, N_X - 1):
-            kappa_k = y * ((F_new[j] - F_old[j]) / dt + 2 * ((F_new[j + 1] - F_new[j - 1]) / (2 * dx)) ** 2 -
-                           (F_new[j + 1] - 2 * F_new[j] + F_new[j - 1]) / dx ** 2) / F_new[j]
-            sigma_k = (1 / F_new[j]) ** 2 + (y * (F_new[j + 1] - F_new[j - 1]) / (2 * dx * F_new[j])) ** 2
+            kappa_k = y * ((F_new[j] - F_old[j]) / dt) / F_new[j]
+            sigma_k = (1 / F_new[j]) ** 2
             m_1 = (temp_T[k, j + 1] - 2.0 * temp_T[k, j] + temp_T[k, j - 1]) / (dx ** 2)
             m_2 = sigma_k * (temp_T[k + 1, j] - 2.0 * temp_T[k, j] + temp_T[k - 1, j]) / (dy ** 2)
             m_3 = kappa_k * (temp_T[k + 1, j] - temp_T[k - 1, j]) / (2.0 * dy)
-            m_4 = 2*y*(F_new[j + 1] - F_new[j - 1])*(temp_T[k+1, j+1] - temp_T[k+1, j-1] - temp_T[k-1, j+1] +
-                                                     temp_T[k-1, j-1])/(F_new[j]*8*dx**2*dy)
-            new_T[k, j] = T[k, j] + dt * (m_1 + m_2 + m_3 - m_4)
+            new_T[k, j] = T[k, j] + dt * (m_1 + m_2 + m_3)
 
     return temp_T
