@@ -11,7 +11,7 @@ def plot_temperature(T, time: float, graph_id: int):
 
     import matplotlib.pyplot as plt
     from mpl_toolkits import mplot3d
-    fig = plt.figure(figsize=(8, 8))
+    fig = plt.figure(figsize=(4, 8))
     ax = plt.axes()
     plt.imshow(T
                , extent=[0, W, 0, H]

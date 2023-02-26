@@ -3,7 +3,7 @@ from linear_algebra.tdma import tdma
 import numpy as np
 
 
-def predict_correct(T, F_new, F_old, dx, dy):
+def predict_correct(T, F, dx, dy):
     """
     Расчёт температуры в новых координатах на новом шаге по времени с помощью схемы предиктор-корректор.
     T – значения температуры на сетке в НОВЫХ координатах
@@ -41,10 +41,9 @@ def predict_correct(T, F_new, F_old, dx, dy):
 
     # ПРЕДСКАЗАНИЕ ПО Y
     for j in range(1, N_X - 1):
+        sigma_k = (1 / F[j]) ** 2
         for k in range(0, N_Y - 1):
-            y = k*dy
-            kappa_k = y*((F_new[j] - F_old[j])/dt)/F_new[j]
-            sigma_k = (1 / F_new[j]) ** 2
+            kappa_k = k*(3.0*temp_T[N_Y-1, j] - 4*temp_T[N_Y-2, j] + temp_T[N_Y-3, j])/(2*gamma*F[j]**2)
             a_y[k] = -dt * (kappa_k / (4 * dy) + sigma_k / (2 * dy ** 2))
             b_y[k] = 1 + dt * sigma_k / (dy ** 2)
             c_y[k] = dt * (kappa_k / (4 * dy) - sigma_k / (2 * dy ** 2))
@@ -60,14 +59,59 @@ def predict_correct(T, F_new, F_old, dx, dy):
         )
 
     # КОРРЕКЦИЯ
-    for k in range(1, N_Y - 1):
-        y = k*dy
-        for j in range(1, N_X - 1):
-            kappa_k = y * ((F_new[j] - F_old[j]) / dt) / F_new[j]
-            sigma_k = (1 / F_new[j]) ** 2
+    for j in range(1, N_X - 1):
+        sigma_k = (1 / F[j]) ** 2
+        for k in range(1, N_Y - 1):
+            kappa_k = k*(3.0 * temp_T[N_Y - 1, j] - 4 * temp_T[N_Y - 2, j] + temp_T[N_Y - 3, j]) / (2 * gamma * F[j] ** 2)
             m_1 = (temp_T[k, j + 1] - 2.0 * temp_T[k, j] + temp_T[k, j - 1]) / (dx ** 2)
             m_2 = sigma_k * (temp_T[k + 1, j] - 2.0 * temp_T[k, j] + temp_T[k - 1, j]) / (dy ** 2)
             m_3 = kappa_k * (temp_T[k + 1, j] - temp_T[k - 1, j]) / (2.0 * dy)
             new_T[k, j] = T[k, j] + dt * (m_1 + m_2 + m_3)
+
+    return temp_T
+
+
+def split_scheme(T, F, dx, dy):
+    temp_T = np.copy(T)
+
+    alpha_0 = 0  # Из левого граничного условия по x
+    beta_0 = T_ice / T_0  # Из левого граничного условия по x
+
+    a = c = np.ones((N_X - 1,)) * (-dt / (dx ** 2))
+    b = np.ones((N_X - 1,)) * (1 + 2 * dt / (dx ** 2))
+
+    a_y = np.empty((N_Y - 1), )
+    b_y = np.empty((N_Y - 1), )
+    c_y = np.empty((N_Y - 1), )
+
+    for k in range(1, N_Y - 1):
+        # ПРОГОНКА
+        temp_T[k, :] = tdma(
+            alpha_0=alpha_0,
+            beta_0=beta_0,
+            u_r=T[k, N_X - 1],
+            a=a,
+            b=b,
+            c=c,
+            f=T[k, :]
+        )
+
+    for j in range(1, N_X - 1):
+        sigma_k = (1 / F[j]) ** 2
+        for k in range(0, N_Y - 1):
+            kappa_k = k*(3.0*temp_T[N_Y-1, j] - 4*temp_T[N_Y-2, j] + temp_T[N_Y-3, j])/(2*gamma*F[j]**2)
+            a_y[k] = -dt * (kappa_k / (2 * dy) + sigma_k / (dy ** 2))
+            b_y[k] = 1 + 2 * dt * sigma_k / (dy ** 2)
+            c_y[k] = dt * (kappa_k / (2 * dy) - sigma_k / (dy ** 2))
+
+        temp_T[:, j] = tdma(
+            alpha_0=alpha_0,
+            beta_0=beta_0,
+            u_r=T[N_Y - 1, j],
+            a=a_y,
+            b=b_y,
+            c=c_y,
+            f=T[:, j]
+        )
 
     return temp_T

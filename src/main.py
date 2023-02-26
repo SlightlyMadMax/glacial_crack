@@ -41,8 +41,7 @@ if __name__ == '__main__':
         print("### ВЫЧИСЛЯЮ ТЕМПЕРАТУРУ, ШАГ = " + str(t_step) + " ###")
         T_new = predict_correct(
             T=T_new,
-            F_new=F_new,
-            F_old=F,
+            F=F_new,
             dx=dx,
             dy=dy
         )
@@ -53,6 +52,5 @@ if __name__ == '__main__':
             time=round(t_step*(dt*t_0), 2),
             graph_id=t_step
         )
-        F = np.copy(F_new)  # В F храним положение границы на предыдущем шаге по времени
         t_step = t_step + 1
     print("### РАСЧЁТ ЗАВЕРШЁН ###")
