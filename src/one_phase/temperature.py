@@ -10,7 +10,7 @@ def init_f_vector(x):
     n_x = len(x)
     F = np.empty(n_x)
     for i in range(0, n_x):
-        F[i] = h + 2*x[i]*x[i]  # Парабола f(x, t=0) = 2*x^2 + h
+        F[i] = h + 100*(x[i] - W/2)**2
     return F
 
 
