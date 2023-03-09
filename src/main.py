@@ -1,3 +1,5 @@
+import time
+
 from one_phase.temperature import *
 from one_phase.fd_scheme import predict_correct
 import numpy as np
@@ -40,6 +42,10 @@ if __name__ == '__main__':
         # print("### ВЫЧИСЛЯЮ ПОЛОЖЕНИЕ ГРАНИЦЫ, ШАГ = " + str(t_step) + " ###")
         # print("### ВЫЧИСЛЯЮ ТЕМПЕРАТУРУ, ШАГ = " + str(t_step) + " ###")
 
+        # print("T_old")
+        # print(T_old)
+        # print("F_old")
+        # print(F_old)
         # Итерационный метод
         for k in range(K):
             T_new = predict_correct(
@@ -54,6 +60,10 @@ if __name__ == '__main__':
         T_old = np.copy(T_new)
         F_old = np.copy(F_new)
 
+        # print("T_new")
+        # print(T_new)
+        # print("F_new")
+        # print(F_new)
         # print("### ТЕМПЕРАТУРА НА НОВОМ ШАГЕ РАССЧИТАНА ###")
         # print("### СОХРАНЯЮ ГРАФИК ###")
         plot_temperature(
@@ -61,6 +71,6 @@ if __name__ == '__main__':
             time=round(t_step*(dt*t_0), 2),
             graph_id=t_step
         )
-
+        # time.sleep(10)
         t_step = t_step + 1
     print("### РАСЧЁТ ЗАВЕРШЁН ###")
