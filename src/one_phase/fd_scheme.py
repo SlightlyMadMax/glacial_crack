@@ -19,29 +19,12 @@ def predict_correct(T, F_new, F_old, dx, dy):
     temp_T = np.copy(T)
     new_T = np.copy(T)
 
-    alpha_0 = 0.0  # Из левого граничного условия по x (1-го рода)
-    beta_0 = T_ice/T_0  # Из левого граничного условия по x
-
     a = c = np.ones((N_X - 1,)) * 0.5 * inv_dx * inv_dx * -dt
     b = np.ones((N_X - 1,)) * (1 + dt * inv_dx * inv_dx)
 
     a_y = np.empty((N_Y - 1),)
     b_y = np.empty((N_Y - 1),)
     c_y = np.empty((N_Y - 1),)
-
-    # ПРЕДСКАЗАНИЕ ПО X
-    for k in range(1, N_Y - 1):
-        # ПРОГОНКА
-        temp_T[k, :] = tdma(
-            alpha_0=alpha_0,
-            beta_0=beta_0,
-            condition_type=1,
-            phi=T_ice/T_0,
-            a=a,
-            b=b,
-            c=c,
-            f=T[k, :]
-        )
 
     alpha_0 = 0.0  # Из левого граничного условия по y (1-го рода)
     beta_0 = T_ice/T_0  # Из левого граничного условия по y
@@ -68,7 +51,24 @@ def predict_correct(T, F_new, F_old, dx, dy):
             a=a_y,
             b=b_y,
             c=c_y,
-            f=temp_T[:, j]
+            f=T[:, j]
+        )
+
+    alpha_0 = 1.0  # Из левого граничного условия по x (1-го рода)
+    beta_0 = 0.0  # Из левого граничного условия по x
+
+    # ПРЕДСКАЗАНИЕ ПО X
+    for k in range(1, N_Y - 1):
+        # ПРОГОНКА
+        temp_T[k, :] = tdma(
+            alpha_0=alpha_0,
+            beta_0=beta_0,
+            condition_type=2,
+            phi=0.0,
+            a=a,
+            b=b,
+            c=c,
+            f=temp_T[k, :]
         )
 
     # КОРРЕКЦИЯ

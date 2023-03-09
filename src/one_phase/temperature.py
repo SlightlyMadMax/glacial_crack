@@ -40,7 +40,6 @@ def recalculate_boundary(F, T, dx, dy):
         inv_F = 1.0/F[i]
         F_new[i] = F[i] + dt*inv_gamma*inv_F*(1.0 + (0.5*inv_W*inv_dx*(F[i+1]-F[i-1]))**2) *\
                    (0.5*inv_dy*(3.0 * T[N_Y - 1, i] - 4.0 * T[N_Y - 2, i] + T[N_Y - 3, i]))
-
     F_new[0] = F[0] + dt*inv_gamma*(1.0 + (0.5*inv_W*inv_dx*(4.0*F[1]-3.0*F[0]-F[2]))**2) *\
                (0.5*inv_dy*(3.0 * T[N_Y-1, 0] - 4.0 * T[N_Y-2, 0] + T[N_Y-3, 0]))/F[0]
     F_new[N_X-1] = F[N_X-1] + dt*inv_gamma*(1.0 + (0.5*inv_W*inv_dx*(3.0*F[N_X-1]-4.0*F[N_X-2]+F[N_X-3]))**2) *\
