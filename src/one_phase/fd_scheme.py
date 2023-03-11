@@ -96,4 +96,4 @@ def predict_correct(T, F_new, F_old, dx, dy):
 
             new_T[k, j] = T[k, j] + dt * (m_1 + m_2 + m_3 - m_4)
 
-    return temp_T
+    return new_T
