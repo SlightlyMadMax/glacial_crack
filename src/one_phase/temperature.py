@@ -2,14 +2,25 @@ import numpy as np
 from parameters import *
 
 
-def init_f_vector(dx, n_x):
+def init_f_vector(n_x):
     """
     Задание начального положения границы фазового перехода.
     """
     F = np.empty(n_x)
     for i in range(n_x):
         # F[i] = h
-        F[i] = h + 3*(i*dx - W/2)*(i*dx - W/2)  # Парабола f(x, t=0) = 3*(x - W/2)^2 + h
+        # F[i] = h + 2*(i*dx - W/2)*(i*dx - W/2)  # Парабола f(x, t=0) = 3*(x - W/2)^2 + h
+        # if i*dx < 0.2 or i*dx > 0.8:
+        #     F[i] = h
+        # else:
+        #     F[i] = 1.0 - 1.5*i*dx if i*dx < W/2 else -0.5 + 1.5*i*dx
+
+        if i*dx < 0.2 or i*dx > 0.8:
+            F[i] = 0.8
+        elif 0.4 < i*dx < 0.6:
+            F[i] = 0.2
+        else:
+            F[i] = 1.4 - 3*i*dx if i*dx < 0.4 else 3*i*dx - 1.6
     return F
 
 
@@ -23,7 +34,7 @@ def init_temperature():
     return T
 
 
-def recalculate_boundary(F, T, dx, dy):
+def recalculate_boundary(F, T):
     """
     Пересчёт положения границы фазового перехода в соответствии с условием Стефана в новых координатах.
     F – вектор значений положения границы фазового перехода.
@@ -59,10 +70,10 @@ def reverse_transform(T, F):
     T_new = np.zeros((new_H, new_W))
 
     for i in range(N_X):
-        new_x = int(round(i * W))
+        new_x = int(round(i*W))
         for j in range(N_Y):
-            new_y = int(round(j * F[new_x]))
-            if new_y < new_H:
+            new_y = int(round(j * F[i]))
+            if new_y < new_H and new_x < int(W*N_X):
                 T_new[new_y, new_x] = T_0*(T[j, i] - 1.0)  # Пересчитываем в ИСХОДНЫЕ координаты и переходим к °С
 
     return T_new

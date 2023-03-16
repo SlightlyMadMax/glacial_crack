@@ -1,4 +1,4 @@
-from parameters import W, H
+from parameters import W, H, N_X, N_Y, dt, t_0
 
 
 def plot_temperature(T, time: float, graph_id: int):
@@ -22,7 +22,11 @@ def plot_temperature(T, time: float, graph_id: int):
                , vmax=0
                )
     plt.colorbar()
-    ax.set_title('time = ' + str(time) + 's')
+    ax.set_title(
+        'time = ' + str(time) + ' h\n' +
+        'dx = 1/' + str(N_X) + ' m, dy = 1/' + str(N_Y) +
+        ' m, dt = ' + str(round(dt * t_0 / 3600.0, 2)) + ' h'
+    )
     ax.set_xlabel('x, m')
     ax.set_ylabel('y, m')
     plt.savefig('../graphs/T_' + str(graph_id) + '.png')
