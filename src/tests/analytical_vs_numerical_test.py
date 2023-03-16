@@ -1,49 +1,47 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.special import erf
-from scipy.optimize import fsolve
 
 spy = 60.*60.*24.  # Seconds per day
 Lf = 334000.0  # Latent heat of fusion (J/kg)
-rho = 999.84  # Bulk density of water (kg/m3), density changes are ignored
+rho = 919.4
 Ks = spy*2.39  # Conductivity of ice (J/mKs)
 cs = 1943.  # Heat capacity of ice (J/kgK) - ** Van der Veen uses 2097 but see Tr and Aschwanden 2012)
-ks = Ks/(919.4*cs)  # Cold ice diffusivity (m2/sec)
+ks = Ks/(rho*cs)  # Cold ice diffusivity (m2/sec)
 
 
 # Problem Constants
-s0 = 0.2
+s0 = 9.0
 t0 = 0.
 Tm = 0.0
 T_ = -20.0
 
 
-# position of the phase boundary
-def MeltLoc(lm, t):
-    return s0 + 2*lm*(t-t0)**.5
-
-
-def Bs(lm):
-    return (Tm-T_)/(erf(lm*ks**(-.5)))
-
-
-def equation_for_lambda(lm):
-    lhs = rho*Lf*lm
-    rhs = -Ks*Bs(lm)*np.pi**(-.5)*np.exp(-lm**2*ks**(-1))*ks**(-.5)
-    return lhs-rhs
-
-
-lam = fsolve(equation_for_lambda, 1.)[0]
-
 ts = np.arange(0, 36, 1)
 
-num = [0.2, 0.25884774861572457, 0.3016078559176033, 0.3389919954384831, 0.3726304431873688, 0.4034653136595022, 0.4320994789965059, 0.4589463887412189, 0.4843042226542184, 0.5083964284869843, 0.531395584203004, 0.5534382738868037, 0.5746347973372544, 0.5950757506697477, 0.6148366287304986, 0.633981131011398, 0.652563591369823, 0.6706307997224468, 0.6882233919588481, 0.7053769269458907, 0.7221227326489171, 0.7384885791325418, 0.7544992198633753, 0.7701768315093169, 0.7855413745738962, 0.8006108916164385, 0.8154017557743516, 0.8299288793506097, 0.8442058900407686, 0.8582452807321619, 0.8720585375638911, 0.8856562499837001, 0.8990482058019319, 0.9122434736690268, 0.9252504749526341, 0.9380770466333911]
-plt.plot(ts, MeltLoc(lam, ts), 'k', lw=2)
-plt.plot(ts, num, 'r', lw=2)
 
-plt.ylim(0.2, 1.2)
+def boundary(t):
+    return s0 + 2*cs*(Tm - T_)*(ks*t)**.5/(np.pi**.5*Lf)
+
+
+num = [9.0, 9.041103980693812, 9.058540849902789, 9.071851153479015, 9.083049422944923, 9.09290451800045, 9.101808131017588, 9.109992036027244, 9.117606855332776, 9.124757017966772, 9.131518452431436, 9.137948416571877, 9.144091355460795, 9.149982588819045, 9.155650736766715, 9.16111937454666, 9.166408196145122, 9.171533854011548, 9.176510578698315, 9.181350645064112, 9.186064729071601, 9.190662185013522, 9.195151263838195, 9.199539287183898, 9.203832787632798, 9.208037622868753, 9.21215906943902, 9.21620190040449, 9.220170450138282, 9.224068668780589, 9.227900168299033, 9.231668261683982, 9.235375996489402, 9.239026183685455, 9.242621422599683, 9.24616412257593]
+
+error = []
+for i in range(1, 36):
+    error.append(100*abs(num[i]-boundary(ts[i]))/(boundary(ts[i])-9.0))
+
+print(num[35])
+print(ts[35])
+print(ts[0])
+print(boundary(ts[35]))
+print(9.092987728561686 - boundary(ts[5]))
+
+plt.plot(ts[1:36], error, 'k', lw=2, label='Relative error, %')
+# plt.plot(ts, num, 'r', lw=2, label='Numerical')
+plt.legend()
+
+plt.ylim(0, 10)
 plt.xlim(0, 36)
 
-plt.ylabel('meters')
+plt.ylabel('%')
 plt.xlabel('days')
 plt.savefig('comparison')
