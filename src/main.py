@@ -1,5 +1,5 @@
 from one_phase.temperature import *
-from schemes.ADI import solve
+from schemes.uniform_grid.ADI import solve
 import numpy as np
 from parameters import *
 from plotting import plot_temperature
@@ -58,12 +58,16 @@ if __name__ == '__main__':
         # print("### ТЕМПЕРАТУРА НА НОВОМ ШАГЕ РАССЧИТАНА ###")
         # print("### СОХРАНЯЮ ГРАФИК ###")
         # time.sleep(10)
-        if t_step % 30 == 0:
+        if t_step % 60 == 0:
             plot_temperature(
                 T=reverse_transform(T_new, F_new),  # Преобразуем к исходным координатам
                 time=round(t_step * (dt * t_0/3600.0), 1),
                 graph_id=t_step
             )
+            # print('T_new')
+            # print(T_new)
+            # print('F_new')
+            # print(F_new)
             # result.append(F_new[50])
             # print(F_new[50])
         t_step = t_step + 1

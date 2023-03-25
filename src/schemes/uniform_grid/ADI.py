@@ -1,6 +1,5 @@
 from parameters import *
 from linear_algebra.tdma import tdma
-from schemes.utils.differences import *
 import numpy as np
 
 
@@ -9,19 +8,52 @@ def find_rhs(T, F_new, F_old, theta: float, j: int, i: int):
     inv_dx = 1.0/dx
     inv_dt = 1.0/dt
 
+    # Производная F по x
+    df_dx = F_new[i + 1] - F_new[i - 1]
+
+    # Первая производная T по y
+    if j == 0:
+        d_y = 4.0 * T[1, i] - 3.0 * T[0, i] - T[2, i]
+    elif j == N_Y - 1:
+        d_y = 3.0 * T[N_Y - 1, i] - 4.0 * T[N_Y - 2, i] + T[N_Y - 3, i]
+    else:
+        d_y = T[j + 1, i] - T[j - 1, i]
+
+    # Вторая производная T по y
+    if j == 0:
+        d_yy = T[2, i] - 2.0 * T[1, i] + T[0, i]
+    elif j == N_Y - 1:
+        d_yy = T[N_Y - 1, i] - 2.0 * T[N_Y - 2, i] + T[N_Y - 3, i]
+    else:
+        d_yy = T[j + 1, i] - 2.0 * T[j, i] + T[j - 1, i]
+
+    # Вторая производная T по x
+    d_xx = T[j, i + 1] - 2.0 * T[j, i] + T[j, i - 1]
+
+    # Смешанная производная T
+    if j == 0:
+        d_xy = 4.0 * T[1, i + 1] - 3.0 * T[0, i + 1] - T[2, i + 1] - 4.0 * T[1, i - 1] + 3.0 * T[0, i - 1] + T[2, i - 1]
+    elif j == N_Y - 1:
+        d_xy = 3.0 * T[N_Y - 1, i + 1] - 4.0 * T[N_Y - 2, i + 1] + T[N_Y - 3, i + 1] - 3.0 * T[N_Y - 1, i - 1] + \
+               4 * T[N_Y - 2, i - 1] - T[N_Y - 3, i - 1]
+    else:
+        d_xy = T[j + 1, i + 1] - T[j + 1, i - 1] - T[j - 1, i + 1] + T[j - 1, i - 1]
+
     sigma = W * W * inv_F_new * inv_F_new + \
-              (j*dy * 0.5 * inv_dx * inv_F_new * d_x(F_new, i)) ** 2
+              (j*dy * 0.5 * inv_dx * inv_F_new * df_dx) ** 2
 
     kappa = j*dy * inv_F_new * (inv_dt * (F_new[i] - F_old[i]) +
-                               2 * (0.5 * inv_dx * d_x(F_new, i)) ** 2 -
+                               2 * (0.5 * inv_dx * df_dx) ** 2 -
                                inv_dx * inv_dx * (F_new[i + 1] - 2 * F_new[i] + F_new[i - 1]))
-    zeta = -2*j*dy*inv_F_new*d_x(F_new, i)
+
+    zeta = -2*j*dy*inv_F_new*df_dx
 
     rhs = T[j, i] + \
-        dt * ((1.0 - theta)*sigma*d_yy(T, j, i) / (dy*dy) +
-              d_xx(T, j, i) / (dx*dx) +
-              0.5 * zeta * d_xy(T, j, i) / (dx*dy) +
-              0.5 * kappa * d_y(T, j, i) / dy)
+        dt * ((1.0 - theta)*sigma*d_yy / (dy*dy) +
+              d_xx / (dx*dx) +
+              0.5 * zeta * d_xy / (dx*dy) +
+              0.5 * kappa * d_y / dy)  # 0.5 ?
+
     return rhs
 
 
@@ -47,11 +79,19 @@ def solve(T, F_new, F_old):
     for i in range(1, N_X - 1):
         inv_F_new = 1.0 / F_new[i]
         for j in range(0, N_Y - 1):
+            if i == 0:
+                df_dx = 4.0 * F_new[1] - 3.0 * F_new[0] - F_new[2]
+            else:
+                df_dx = F_new[i + 1] - F_new[i - 1]
+
             sigma_j = W * W * inv_F_new * inv_F_new + \
-                          (j * dy * 0.5 * inv_dx * inv_F_new * (d_x(F_new, i))) ** 2
+                          (j * dy * 0.5 * inv_dx * inv_F_new * df_dx) ** 2
+
             a_y[j] = c_y[j] = inv_dy * inv_dy * -dt * theta * sigma_j
             b_y[j] = 1 + 2 * dt * inv_dy * inv_dy * theta * sigma_j
+
             rhs[j] = find_rhs(T, F_new, F_old, theta, j, i)
+
         rhs[N_Y-1] = find_rhs(T, F_new, F_old, theta, N_Y-1, i)
 
         # ПРОГОНКА
@@ -59,7 +99,7 @@ def solve(T, F_new, F_old):
             alpha_0=alpha_0,
             beta_0=beta_0,
             condition_type=1,
-            phi=T_0/T_0,
+            phi=1.0,  # T_0/T_0
             a=a_y,
             b=b_y,
             c=c_y,
@@ -75,7 +115,15 @@ def solve(T, F_new, F_old):
     rhs = np.empty(N_X,)
     for j in range(1, N_Y - 1):
         for i in range(0, N_X):
-            rhs[i] = temp_T[j, i] - theta * dt * inv_dx * inv_dx * d_xx(T, j, i)
+            if i == 0:
+                d_xx = T[j, 2] - 2.0 * T[j, 1] + T[j, 0]
+            elif i == N_X - 1:
+                d_xx = T[j, N_X - 1] - 2.0 * T[j, N_X - 2] + T[j, N_X - 3]
+            else:
+                d_xx = T[j, i + 1] - 2.0 * T[j, i] + T[j, i - 1]
+
+            rhs[i] = temp_T[j, i] - theta * dt * inv_dx * inv_dx * d_xx
+
         new_T[j, :] = tdma(
             alpha_0=alpha_0,
             beta_0=beta_0,

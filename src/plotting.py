@@ -18,7 +18,7 @@ def plot_temperature(T, time: float, graph_id: int):
                , origin='lower'
                , cmap='winter'
                , interpolation='none'
-               , vmin=-20
+               , vmin=-10
                , vmax=0
                )
     plt.colorbar()
@@ -30,6 +30,6 @@ def plot_temperature(T, time: float, graph_id: int):
     ax.set_xlabel('x, m')
     ax.set_ylabel('y, m')
     plt.savefig('../graphs/T_' + str(graph_id) + '.png')
-    plt.show()
+    # plt.show()
 
 

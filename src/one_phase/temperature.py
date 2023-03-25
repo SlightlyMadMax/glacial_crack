@@ -14,13 +14,11 @@ def init_f_vector(n_x):
         #     F[i] = h
         # else:
         #     F[i] = 1.0 - 1.5*i*dx if i*dx < W/2 else -0.5 + 1.5*i*dx
-
-        if i*dx < 0.2 or i*dx > 0.8:
-            F[i] = 0.8
-        elif 0.4 < i*dx < 0.6:
-            F[i] = 0.2
+        #
+        if i*dx < 0.4 or i*dx > 0.6:
+            F[i] = 1.0
         else:
-            F[i] = 1.4 - 3*i*dx if i*dx < 0.4 else 3*i*dx - 1.6
+            F[i] = 3.8 - 7.0*i*dx if i*dx < 0.5 else 7.0*i*dx - 3.2
     return F
 
 
@@ -30,7 +28,7 @@ def init_temperature():
     """
     T = np.empty((N_Y, N_X))
     T[:, :] = T_ice/T_0  # Температура льда
-    T[N_Y-1, :] = T_0/T_0  # Температура фазового перехода
+    T[N_Y-1, :] = 1.0  # Температура фазового перехода
     return T
 
 
@@ -74,7 +72,6 @@ def reverse_transform(T, F):
         for j in range(N_Y):
             new_y = int(round(j * F[i]))
             if new_y < new_H and new_x < int(W*N_X):
-                T_new[new_y, new_x] = T_0*(T[j, i] - 1.0)  # Пересчитываем в ИСХОДНЫЕ координаты и переходим к °С
-
+                T_new[new_y, new_x] = T_0*T[j, i] - T_0  # Пересчитываем в ИСХОДНЫЕ координаты и переходим к °С
     return T_new
 
