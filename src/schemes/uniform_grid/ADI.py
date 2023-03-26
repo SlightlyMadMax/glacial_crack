@@ -79,14 +79,8 @@ def solve(T, F_new, F_old):
     for i in range(1, N_X - 1):
         inv_F_new = 1.0 / F_new[i]
         for j in range(0, N_Y - 1):
-            if i == 0:
-                df_dx = 4.0 * F_new[1] - 3.0 * F_new[0] - F_new[2]
-            else:
-                df_dx = F_new[i + 1] - F_new[i - 1]
-
-            sigma_j = W * W * inv_F_new * inv_F_new + \
-                          (j * dy * 0.5 * inv_dx * inv_F_new * df_dx) ** 2
-
+            df_dx = F_new[i + 1] - F_new[i - 1]
+            sigma_j = W * W * inv_F_new * inv_F_new + (j * dy * 0.5 * inv_dx * inv_F_new * df_dx) ** 2
             a_y[j] = c_y[j] = inv_dy * inv_dy * -dt * theta * sigma_j
             b_y[j] = 1 + 2 * dt * inv_dy * inv_dy * theta * sigma_j
 
