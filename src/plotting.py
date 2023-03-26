@@ -29,7 +29,7 @@ def plot_temperature(T, time: float, graph_id: int):
     )
     ax.set_xlabel('x, m')
     ax.set_ylabel('y, m')
-    plt.savefig('../graphs/T_' + str(graph_id) + '.png')
-    # plt.show()
+    plt.savefig('../graphs/temperature/T_' + str(graph_id) + '.png')
+    plt.show()
 
 

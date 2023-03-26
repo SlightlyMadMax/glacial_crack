@@ -82,7 +82,7 @@ def solve(T, F_new, F_old):
             df_dx = F_new[i + 1] - F_new[i - 1]
             sigma_j = W * W * inv_F_new * inv_F_new + (j * dy * 0.5 * inv_dx * inv_F_new * df_dx) ** 2
             a_y[j] = c_y[j] = inv_dy * inv_dy * -dt * theta * sigma_j
-            b_y[j] = 1 + 2 * dt * inv_dy * inv_dy * theta * sigma_j
+            b_y[j] = 1.0 + 2.0 * dt * inv_dy * inv_dy * theta * sigma_j
 
             rhs[j] = find_rhs(T, F_new, F_old, theta, j, i)
 
@@ -101,7 +101,7 @@ def solve(T, F_new, F_old):
         )
 
     a = c = np.ones((N_X - 1,)) * inv_dx * inv_dx * -dt * theta
-    b = np.ones((N_X - 1,)) * (1 + 2 * dt * inv_dx * inv_dx * theta)
+    b = np.ones((N_X - 1,)) * (1.0 + 2.0 * dt * inv_dx * inv_dx * theta)
 
     alpha_0 = 1.0  # Из левого граничного условия по x (2-го рода)
     beta_0 = 0.0  # Из левого граничного условия по x
