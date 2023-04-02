@@ -1,6 +1,6 @@
-from one_phase.nonuniform_grid.schemes.ADI import solve
-from one_phase.nonuniform_grid.boundary import init_f_vector, recalculate_boundary
-from one_phase.nonuniform_grid.temperature import reverse_transform, init_temperature
+from one_phase.nonuniform_y_grid.schemes.ADI import solve
+from one_phase.nonuniform_y_grid.boundary import init_f_vector, recalculate_boundary
+from one_phase.nonuniform_y_grid.temperature import reverse_transform, init_temperature
 from parameters import *
 from plotting import plot_temperature
 import numpy as np
@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     # Инициализируем положение границы фазового перехода в начальный момент времени
     # в НОВЫХ координатах
-    F = init_f_vector(n_x=int(N_X))
+    F = init_f_vector(n_x=N_X)
 
     # Начальное распределение температуры в НОВЫХ координатах
     T = init_temperature()
