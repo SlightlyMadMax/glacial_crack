@@ -9,12 +9,12 @@ def init_f_vector(n_x):
     F = np.empty(n_x)
     for i in range(n_x):
         # F[i] = a
-        # F[i] = h + 2*(i*dx - W/2)*(i*dx - W/2)  # Парабола f(x, t=0) = 3*(x - W/2)^2 + h
+        # F[i] = a + 2*(i*dx - W/2)*(i*dx - W/2)  # Парабола f(x, t=0) = 3*(x - W/2)^2 + h
         # if i*dx < 0.2 or i*dx > 0.8:
         #     F[i] = h
         # else:
         #     F[i] = 1.0 - 1.5*i*dx if i*dx < W/2 else -0.5 + 1.5*i*dx
-        #
+
         if i*dx < 0.4 or i*dx > 0.6:
             F[i] = 1.0
         else:

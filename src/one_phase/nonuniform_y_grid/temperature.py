@@ -18,6 +18,7 @@ def reverse_transform(T, F):
     T – матрица значений температуры на сетке в НОВЫХ координатах.
     F – вектор значений положения границы фазового перехода.
     """
+
     new_H = int(H*N_Y)
     new_W = int(W*N_X)
 
@@ -32,5 +33,6 @@ def reverse_transform(T, F):
             new_y = int(round(y * F[i] / dy))
             if new_y < new_H and new_x < int(W*N_X):
                 T_new[new_y, new_x] = T_0*T[j, i] - T_0  # Пересчитываем в ИСХОДНЫЕ координаты и переходим к °С
+
     return T_new
 

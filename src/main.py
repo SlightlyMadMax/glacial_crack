@@ -2,7 +2,7 @@ from one_phase.nonuniform_y_grid.schemes.ADI import solve
 from one_phase.nonuniform_y_grid.boundary import init_f_vector, recalculate_boundary
 from one_phase.nonuniform_y_grid.temperature import reverse_transform, init_temperature
 from parameters import *
-from plotting import plot_temperature
+from plotting import plot_temperature, plot_non_transformed
 import numpy as np
 import time
 
@@ -18,8 +18,9 @@ if __name__ == '__main__':
     T = init_temperature()
 
     # График начального распределения температуры (в исходных координатах)
-    plot_temperature(
-        T=reverse_transform(T, F),  # Преобразуем к исходным координатам
+    plot_non_transformed(
+        T=T,
+        F=F,
         time=0,
         graph_id=0
     )
@@ -56,16 +57,17 @@ if __name__ == '__main__':
         # print("T_new")
         # print(T_new)
         # print("F_new")
-        #print(F_new)
+        # print(F_new)
         # print("### ТЕМПЕРАТУРА НА НОВОМ ШАГЕ РАССЧИТАНА ###")
         # print("### СОХРАНЯЮ ГРАФИК ###")
-        if t_step % 20 == 0:
-            plot_temperature(
-                T=reverse_transform(T_new, F_new),  # Преобразуем к исходным координатам
+        if t_step % 60 == 0:
+            plot_non_transformed(
+                T=T_new,
+                F=F_new,
                 time=round(t_step * (dt * t_0/3600.0), 1),
                 graph_id=t_step
             )
-            # result.append(F_new[25])
+            result.append(F_new[25])
             # print(F_new[25])
         t_step = t_step + 1
 

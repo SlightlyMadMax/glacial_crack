@@ -19,7 +19,7 @@ temp = 0
 for i in range(0, N_Y + 1):
     temp += 2*i/(N_Y*(N_Y+1))
     # y = [1.0 - temp for j in range(0, N + 1)]
-    y = [(1.0 - temp)*f(x[j]) for j in range(0, N_Y+1)]
+    y = [(1.0 - temp)*f(x[j]) for j in range(0, N_Y)]
     plt.plot(x, y, 'o', color='k', markersize=3,)
 
 # plt.ylim(0, 1)
