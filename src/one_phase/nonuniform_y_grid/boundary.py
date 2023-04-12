@@ -1,5 +1,6 @@
 import numpy as np
 from parameters import *
+from src.one_phase.nonuniform_y_grid.schemes.ADI import sigmoid
 
 
 def init_f_vector(n_x):
@@ -34,17 +35,17 @@ def recalculate_boundary(F, T):
     inv_W = 1.0/W
     inv_gamma = 1.0/gamma
 
-    h_j = 4.0 / (N_Y * (N_Y + 1.0))
-    h = 6.0 / (N_Y * (N_Y + 1.0))
+    h = 1.0 - sigmoid((N_Y - 2) / (N_Y - 1))
+    h_0 = sigmoid((N_Y - 2) / (N_Y - 1)) - sigmoid((N_Y - 3) / (N_Y - 1))
 
     for i in range(1, N_X-1):
         F_new[i] = F[i] + dt*inv_gamma*(1.0 + (0.5*inv_W*inv_dx*(F[i+1]-F[i-1]))*(0.5*inv_W*inv_dx*(F[i+1]-F[i-1]))) * \
-                   ((T[N_Y-1, i] - T[N_Y-2, i])*(h_j + h)*(h_j + h) + (T[N_Y-3, i]-T[N_Y-1, i])*h_j*h_j)/(h*h_j*(h+h_j)*F[i])
+                   ((T[N_Y-1, i] - T[N_Y-2, i])*(h + h_0)*(h + h_0) + (T[N_Y-3, i]-T[N_Y-1, i])*h*h)/(h_0*h*(h_0+h)*F[i])
 
     F_new[0] = F[0] + dt*inv_gamma*(1.0 + (0.5*inv_W*inv_dx*(4.0*F[1]-3.0*F[0]-F[2]))*(0.5*inv_W*inv_dx*(4.0*F[1]-3.0*F[0]-F[2]))) *\
-               ((T[N_Y-1, 0] - T[N_Y-2, 0])*(h_j + h)*(h_j + h) + (T[N_Y-3, 0]-T[N_Y-1, 0])*h_j*h_j)/(h*h_j*(h+h_j)*F[0])
+               ((T[N_Y-1, 0] - T[N_Y-2, 0])*(h + h_0)*(h + h_0) + (T[N_Y-3, 0]-T[N_Y-1, 0])*h*h)/(h_0*h*(h_0+h)*F[0])
 
     F_new[N_X-1] = F[N_X-1] + dt*inv_gamma*(1.0 + (0.5*inv_W*inv_dx*(3.0*F[N_X-1]-4.0*F[N_X-2]+F[N_X-3]))**2) *\
-                ((T[N_Y-1, N_X-1] - T[N_Y-2, N_X-1])*(h_j + h)*(h_j + h) + (T[N_Y-3, N_X-1]-T[N_Y-1, N_X-1])*h_j*h_j)/(h*h_j*(h+h_j)*F[N_X-1])
+                ((T[N_Y-1, N_X-1] - T[N_Y-2, N_X-1])*(h + h_0)*(h + h_0) + (T[N_Y-3, N_X-1]-T[N_Y-1, N_X-1])*h*h)/(h_0*h*(h_0+h)*F[N_X-1])
 
     return F_new

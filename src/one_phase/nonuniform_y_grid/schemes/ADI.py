@@ -1,12 +1,22 @@
 from parameters import *
 from linear_algebra.tdma import tdma
 import numpy as np
+import math
 
-factor = 1.0 / (N_Y * (N_Y + 1.0))
+
+def sigmoid(t: float):
+    return 1.0 - math.exp(-s * t) + math.exp(-s)
 
 
 def find_rhs(T, F_new, F_old, j: int, i: int):
-    y = (j + 1.0) * (2.0 * N_Y - j) * factor
+
+    if j == 0:
+        y = 0.0
+    elif j == N_Y - 1:
+        y = 1.0
+    else:
+        y = sigmoid(j / (N_Y - 1))
+
     inv_F_new = 1.0/F_new[i]
     inv_dx = 1.0/dx
     inv_dt = 1.0/dt
@@ -14,31 +24,34 @@ def find_rhs(T, F_new, F_old, j: int, i: int):
     # Производная F по x
     df_dx = F_new[i + 1] - F_new[i - 1]
 
-    h_j = 2.0 * (N_Y - j) * factor
-
     # Первая и смешанная производная T по y
     if j == 0:
-        h_1 = 2.0 * (N_Y - 1.0) * factor
+        h = sigmoid(1.0 / (N_Y - 1))
+        h_1 = sigmoid(2.0 / (N_Y - 1)) - h
 
-        d_y = ((T[1, i] - T[0, i])*(h_j + h_1)*(h_j + h_1) - (T[2, i] - T[0, i])*h_j*h_j)/(h_j*h_1*(h_j+h_1))
+        d_y = ((T[1, i] - T[0, i]) * (h + h_1) * (h + h_1) - (T[2, i] - T[0, i]) * h * h) / (h * h_1 * (h + h_1))
 
-        d_xy = ((T[1, i+1]-T[0, i+1]-T[1, i-1]+T[0, i-1])*(h_j+h_1)*(h_j+h_1) +
-                (T[2, i-1]-T[0, i-1]-T[2, i+1]+T[0, i+1])*h_j*h_j)/(h_j*h_1*(h_j+h_1)*dx)
+        d_xy = ((T[1, i+1]-T[0, i+1]-T[1, i-1]+T[0, i-1])*(h+h_1)*(h+h_1) +
+                (T[2, i-1]-T[0, i-1]-T[2, i+1]+T[0, i+1])*h*h)/(h*h_1*(h+h_1)*dx)
 
     elif j == N_Y - 1:
-        h_0 = 6.0 * factor
-        h_1 = 4.0 * factor
+        h = 1.0 - sigmoid((N_Y - 2) / (N_Y - 1))
+        h_0 = sigmoid((N_Y - 2) / (N_Y - 1)) - sigmoid((N_Y - 3) / (N_Y - 1))
 
-        d_y = ((T[N_Y-1, i] - T[N_Y-2, i])*(h_1 + h_0)*(h_1 + h_0) + (T[N_Y-3, i] - T[N_Y-1, i])*h_1*h_1)/(h_0*h_1*(h_1+h_0))
+        d_y = ((T[N_Y-1, i] - T[N_Y-2, i])*(h_0 + h)*(h_0 + h) + (T[N_Y-3, i] - T[N_Y-1, i])*h*h)/(h*h_0*(h+h_0))
 
-        d_xy = ((T[N_Y-1, i+1]-T[N_Y-2, i+1]-T[N_Y-1, i-1]+T[N_Y-2, i-1])*(h_0+h_1)*(h_0+h_1) +
-                (T[N_Y-3, i+1] - T[N_Y-1, i+1] - T[N_Y-3, i-1] + T[N_Y-1, i-1])*h_1*h_1)/(h_1*h_0*(h_1+h_0)*dx)
+        d_xy = ((T[N_Y-1, i+1]-T[N_Y-2, i+1]-T[N_Y-1, i-1]+T[N_Y-2, i-1])*(h_0+h)*(h_0+h) +
+                (T[N_Y-3, i+1] - T[N_Y-1, i+1] - T[N_Y-3, i-1] + T[N_Y-1, i-1])*h*h)/(h*h_0*(h+h_0)*dx)
     else:
-        h_0 = 2.0 * (N_Y - j + 1.0) * factor
-        h_2 = 2.0 * (N_Y - j - 1.0) * factor
+        h = sigmoid((j + 1) / (N_Y - 1)) - y
+        h_0 = y - sigmoid((j - 1) / (N_Y - 1))
+        h_2 = sigmoid((j + 2) / (N_Y - 1)) - sigmoid((j + 1) / (N_Y - 1))
 
-        d_y = (T[j + 1, i] - T[j - 1, i])/(h_j+h_0)
+        # d_y = (T[j + 1, i] - T[j - 1, i]) / (h + h_0)
 
+        d_y = (T[j + 1, i] * h_0 * h_0 - T[j - 1, i] * h * h + T[j, i] * (h * h - h_0 * h_0))/(h * h_0 * (h + h_0))
+
+        # TODO: second order for d_xy
         d_xy = (T[j + 1, i + 1] - T[j + 1, i - 1] - T[j - 1, i + 1] + T[j - 1, i - 1]) / (dx * (h_0 + h_2))
 
     # Вторая производная T по x
@@ -74,16 +87,22 @@ def solve(T, F_new, F_old):
     for i in range(1, N_X - 1):
         inv_F_new = 1.0 / F_new[i]
         for j in range(0, N_Y - 1):
-            y = (j + 1.0)*(2.0 * N_Y - j) * factor
+            if j == 0:
+                y = 0.0
+                h = sigmoid(1.0 / (N_Y - 1))
+                h_0 = 1.0  # не играет роли
+            else:
+                y = sigmoid(j / (N_Y - 1))
+                h = sigmoid((j + 1) / (N_Y - 1)) - y
+                h_0 = y - sigmoid((j - 1) / (N_Y - 1))
+
             df_dx = F_new[i + 1] - F_new[i - 1]
-            h_j = 2.0 * (N_Y - j) * factor
-            h_0 = 2.0 * (N_Y - j + 1.0) * factor
 
             sigma_j = W * W * inv_F_new * inv_F_new + (0.5 * y * inv_dx * inv_F_new * df_dx)*(0.5 * y * inv_dx * inv_F_new * df_dx)
 
-            a_y[j] = -2.0 * dt * sigma_j / (h_j * (h_j + h_0))
-            c_y[j] = -2.0 * dt * sigma_j / (h_0 * (h_j + h_0))
-            b_y[j] = 1.0 + 2.0 * dt * sigma_j / (h_j * h_0)
+            a_y[j] = -2.0 * dt * sigma_j / (h * (h + h_0))
+            c_y[j] = -2.0 * dt * sigma_j / (h_0 * (h + h_0))
+            b_y[j] = 1.0 + 2.0 * dt * sigma_j / (h * h_0)
 
             rhs[j] = find_rhs(T, F_new, F_old, j, i)
 

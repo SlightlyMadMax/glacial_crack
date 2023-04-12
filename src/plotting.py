@@ -1,13 +1,20 @@
 from parameters import W, H, N_X, N_Y, dt, t_0, T_0
 import matplotlib.pyplot as plt
 import numpy as np
+from src.one_phase.nonuniform_y_grid.schemes.ADI import sigmoid
 
 
 def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = True):
-    factor = 1.0 / (N_Y * (N_Y + 1.0))
-
     x = np.linspace(0, 1.0, N_X)
-    y = [(j + 1.0) * (2.0 * N_Y - j) * factor for j in range(N_Y)]
+    y = np.empty(N_Y)
+
+    for j in range(N_Y):
+        if j == 0:
+            y[j] = 0.0
+        elif j == N_Y - 1:
+            y[j] = 1.0
+        else:
+            y[j] = sigmoid(j / (N_Y - 1))
 
     X, Y = np.meshgrid(x, y)
 
@@ -16,7 +23,7 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
 
     fig = plt.figure()
     ax = plt.axes()
-    plt.contourf(X, Y, T_0*T - T_0, 20, cmap="viridis")
+    plt.contourf(X, Y, T_0*T - T_0, 30, cmap="viridis")
     plt.colorbar()
 
     if non_uniform:
@@ -28,8 +35,7 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
     ax.set_xlabel("x, m")
     ax.set_ylabel("y, m")
     plt.savefig(f"../graphs/temperature/T_{str(graph_id)}.png")
-    plt.close()
-    # plt.show()
+    plt.show()
 
 
 def plot_temperature(T, time: float, graph_id: int):

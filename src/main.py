@@ -67,7 +67,7 @@ if __name__ == '__main__':
                 time=round(t_step * (dt * t_0/3600.0), 1),
                 graph_id=t_step
             )
-            result.append(F_new[25])
+            # result.append(F_new[25])
             # print(F_new[25])
         t_step = t_step + 1
 
