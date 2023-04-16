@@ -1,6 +1,6 @@
 import numpy as np
 from parameters import *
-from src.one_phase.nonuniform_y_grid.schemes.ADI import sigmoid
+from src.one_phase.nonuniform_y_grid.grid_generation import get_node_coord
 
 
 def init_f_vector(n_x):
@@ -32,8 +32,8 @@ def recalculate_boundary(F, T):
     inv_W = 1.0/W
     inv_gamma = 1.0/gamma
 
-    h = 1.0 - sigmoid((N_Y - 2) / (N_Y - 1))
-    h_0 = sigmoid((N_Y - 2) / (N_Y - 1)) - sigmoid((N_Y - 3) / (N_Y - 1))
+    h = 1.0 - get_node_coord((N_Y - 2) / (N_Y - 1))
+    h_0 = get_node_coord((N_Y - 2) / (N_Y - 1)) - get_node_coord((N_Y - 3) / (N_Y - 1))
 
     for i in range(1, N_X-1):
         df_dx = 0.5 * inv_W * inv_dx * (F[i+1]-F[i-1])
