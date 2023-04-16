@@ -1,11 +1,7 @@
 from parameters import *
 from linear_algebra.tdma import tdma
+from src.one_phase.nonuniform_y_grid.grid_generation import get_node_coord
 import numpy as np
-import math
-
-
-def sigmoid(t: float):
-    return 1.0 - math.exp(-s * t) + math.exp(-s)
 
 
 def find_rhs(T, F_new, F_old, j: int, i: int):
@@ -15,7 +11,7 @@ def find_rhs(T, F_new, F_old, j: int, i: int):
     elif j == N_Y - 1:
         y = 1.0
     else:
-        y = sigmoid(j / (N_Y - 1))
+        y = get_node_coord(j / (N_Y - 1))
 
     inv_F_new = 1.0/F_new[i]
     inv_dx = 1.0/dx
@@ -26,8 +22,8 @@ def find_rhs(T, F_new, F_old, j: int, i: int):
 
     # Первая и смешанная производная T по y
     if j == 0:
-        h = sigmoid(1.0 / (N_Y - 1))
-        h_1 = sigmoid(2.0 / (N_Y - 1)) - h
+        h = get_node_coord(1.0 / (N_Y - 1))
+        h_1 = get_node_coord(2.0 / (N_Y - 1)) - h
 
         d_y = ((T[1, i] - T[0, i]) * (h + h_1) * (h + h_1) - (T[2, i] - T[0, i]) * h * h) / (h * h_1 * (h + h_1))
 
@@ -35,17 +31,17 @@ def find_rhs(T, F_new, F_old, j: int, i: int):
                 (T[2, i-1]-T[0, i-1]-T[2, i+1]+T[0, i+1])*h*h)/(h*h_1*(h+h_1)*dx)
 
     elif j == N_Y - 1:
-        h = 1.0 - sigmoid((N_Y - 2) / (N_Y - 1))
-        h_0 = sigmoid((N_Y - 2) / (N_Y - 1)) - sigmoid((N_Y - 3) / (N_Y - 1))
+        h = 1.0 - get_node_coord((N_Y - 2) / (N_Y - 1))
+        h_0 = get_node_coord((N_Y - 2) / (N_Y - 1)) - get_node_coord((N_Y - 3) / (N_Y - 1))
 
         d_y = ((T[N_Y-1, i] - T[N_Y-2, i])*(h_0 + h)*(h_0 + h) + (T[N_Y-3, i] - T[N_Y-1, i])*h*h)/(h*h_0*(h+h_0))
 
         d_xy = ((T[N_Y-1, i+1]-T[N_Y-2, i+1]-T[N_Y-1, i-1]+T[N_Y-2, i-1])*(h_0+h)*(h_0+h) +
                 (T[N_Y-3, i+1] - T[N_Y-1, i+1] - T[N_Y-3, i-1] + T[N_Y-1, i-1])*h*h)/(h*h_0*(h+h_0)*dx)
     else:
-        h = sigmoid((j + 1) / (N_Y - 1)) - y
-        h_0 = y - sigmoid((j - 1) / (N_Y - 1))
-        h_2 = sigmoid((j + 2) / (N_Y - 1)) - sigmoid((j + 1) / (N_Y - 1))
+        h = get_node_coord((j + 1) / (N_Y - 1)) - y
+        h_0 = y - get_node_coord((j - 1) / (N_Y - 1))
+        h_2 = get_node_coord((j + 2) / (N_Y - 1)) - get_node_coord((j + 1) / (N_Y - 1))
 
         # d_y = (T[j + 1, i] - T[j - 1, i]) / (h + h_0)
 
@@ -89,12 +85,12 @@ def solve(T, F_new, F_old):
         for j in range(0, N_Y - 1):
             if j == 0:
                 y = 0.0
-                h = sigmoid(1.0 / (N_Y - 1))
+                h = get_node_coord(1.0 / (N_Y - 1))
                 h_0 = 1.0  # не играет роли
             else:
-                y = sigmoid(j / (N_Y - 1))
-                h = sigmoid((j + 1) / (N_Y - 1)) - y
-                h_0 = y - sigmoid((j - 1) / (N_Y - 1))
+                y = get_node_coord(j / (N_Y - 1))
+                h = get_node_coord((j + 1) / (N_Y - 1)) - y
+                h_0 = y - get_node_coord((j - 1) / (N_Y - 1))
 
             df_dx = F_new[i + 1] - F_new[i - 1]
 

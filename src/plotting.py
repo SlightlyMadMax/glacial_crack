@@ -1,7 +1,7 @@
 from parameters import W, H, N_X, N_Y, dt, t_0, T_0
 import matplotlib.pyplot as plt
 import numpy as np
-from src.one_phase.nonuniform_y_grid.schemes.ADI import sigmoid
+from src.one_phase.nonuniform_y_grid.grid_generation import get_node_coord
 
 
 def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = True):
@@ -14,7 +14,7 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
         elif j == N_Y - 1:
             y[j] = 1.0
         else:
-            y[j] = sigmoid(j / (N_Y - 1))
+            y[j] = get_node_coord(j / (N_Y - 1))
 
     X, Y = np.meshgrid(x, y)
 
