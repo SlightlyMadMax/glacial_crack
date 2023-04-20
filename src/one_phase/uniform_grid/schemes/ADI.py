@@ -43,7 +43,7 @@ def find_rhs(T, F_new, F_old, theta: float, j: int, i: int):
               (j*dy * 0.5 * inv_dx * inv_F_new * df_dx) ** 2
 
     kappa = j*dy * inv_F_new * (inv_dt * (F_new[i] - F_old[i]) +
-                               2 * (0.5 * inv_dx * df_dx) ** 2 -
+                               2 * inv_F_new * (0.5 * inv_dx * df_dx) ** 2 -
                                inv_dx * inv_dx * (F_new[i + 1] - 2 * F_new[i] + F_new[i - 1]))
 
     zeta = -2*j*dy*inv_F_new*df_dx

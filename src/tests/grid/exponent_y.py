@@ -9,13 +9,13 @@ alpha = 4
 dx = 1.0/(N_X - 1.0)
 
 
-def sigma(t: float):
+def get_node_coord(t: float):
     return 1.0 - math.exp(-alpha*t) + math.exp(-alpha)
 
 
 z = [i / (N_Y - 1) for i in range(1, N_Y - 1)]
 
-y = [sigma(z[j]) for j in range(0, N_Y - 2)]
+y = [get_node_coord(z[j]) for j in range(0, N_Y - 2)]
 
 print(y)
 

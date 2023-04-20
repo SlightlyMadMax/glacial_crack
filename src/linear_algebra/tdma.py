@@ -1,7 +1,12 @@
 import numpy as np
+import numba
 
 
-def tdma(alpha_0, beta_0, phi, a, b, c, f, psi=None, h=0, condition_type: int = 1):
+@numba.jit
+def tdma(
+        alpha_0: float, beta_0: float, phi: float,
+        a, b, c, f, psi: float = 0.0,
+        h: float = 0.0, condition_type: int = 1):
     """
     Алгоритм прогонки.
     Здесь alpha_0 и beta_0 начальные прогоночные коэффициенты, определяемые из граничных условий

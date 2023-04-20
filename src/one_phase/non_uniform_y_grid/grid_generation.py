@@ -1,4 +1,4 @@
-from parameters import *
+from parameters import s
 import math
 
 

@@ -1,7 +1,7 @@
 from parameters import W, H, N_X, N_Y, dt, t_0, T_0
 import matplotlib.pyplot as plt
 import numpy as np
-from src.one_phase.nonuniform_y_grid.grid_generation import get_node_coord
+from src.one_phase.non_uniform_y_grid.grid_generation import get_node_coord
 
 
 def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = True):
@@ -34,7 +34,7 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
     ax.set_title(title)
     ax.set_xlabel("x, m")
     ax.set_ylabel("y, m")
-    plt.savefig(f"../graphs/temperature/T_{str(graph_id)}.png")
+    plt.savefig(f"graphs/temperature/T_{str(graph_id)}.png")
     plt.show()
 
 
@@ -64,5 +64,5 @@ def plot_temperature(T, time: float, graph_id: int):
     )
     ax.set_xlabel('x, m')
     ax.set_ylabel('y, m')
-    plt.savefig('../graphs/temperature/T_' + str(graph_id) + '.png')
+    plt.savefig(f"graphs/temperature/T_{str(graph_id)}.png")
     plt.show()

@@ -1,8 +1,8 @@
-from one_phase.nonuniform_y_grid.schemes.ADI import solve
-from one_phase.nonuniform_y_grid.boundary import init_f_vector, recalculate_boundary
-from one_phase.nonuniform_y_grid.temperature import reverse_transform, init_temperature
+from one_phase.non_uniform_y_grid.schemes.ADI import solve
+from one_phase.non_uniform_y_grid.boundary import init_f_vector, recalculate_boundary
+from one_phase.non_uniform_y_grid.temperature import init_temperature
 from parameters import *
-from plotting import plot_temperature, plot_non_transformed
+from one_phase.plotting import plot_non_transformed
 import numpy as np
 import time
 
@@ -35,14 +35,13 @@ if __name__ == '__main__':
 
     K = 2  # Число итераций на одном шаге
     result = []
+
+    start_time = time.process_time()
+
     while t_step < N_t:
         # print("### ВЫЧИСЛЯЮ ПОЛОЖЕНИЕ ГРАНИЦЫ, ШАГ = " + str(t_step) + " ###")
         # print("### ВЫЧИСЛЯЮ ТЕМПЕРАТУРУ, ШАГ = " + str(t_step) + " ###")
 
-        # print("T_old")
-        # print(T_old)
-        # print("F_old")
-        # print(F_old)
         # Итерационный метод
         for k in range(K):
             T_new = solve(
@@ -52,23 +51,25 @@ if __name__ == '__main__':
             )
             F_new = recalculate_boundary(F=F_old, T=T_new)
 
+        if np.amax(F_new) >= H:
+            print("Фазовый переход дошел до верхней границы области.")
+            break
+
         T_old = np.copy(T_new)
         F_old = np.copy(F_new)
-        # print("T_new")
-        # print(T_new)
-        # print("F_new")
-        # print(F_new)
+
         # print("### ТЕМПЕРАТУРА НА НОВОМ ШАГЕ РАССЧИТАНА ###")
         # print("### СОХРАНЯЮ ГРАФИК ###")
-        if t_step % 60 == 0:
-            plot_non_transformed(
-                T=T_new,
-                F=F_new,
-                time=round(t_step * (dt * t_0/3600.0), 1),
-                graph_id=t_step
-            )
-            # result.append(F_new[25])
-            # print(F_new[25])
+        if t_step % 24 == 0:
+            # plot_non_transformed(
+            #     T=T_new,
+            #     F=F_new,
+            #     time=round(t_step * (dt * t_0/3600.0), 1),
+            #     graph_id=t_step
+            # )
+            print(f"Elapsed CPU time: {time.process_time() - start_time}")
+            result.append(F_new[15])
+            print(F_new[15])
         t_step = t_step + 1
 
     print("### РАСЧЁТ ЗАВЕРШЁН ###")

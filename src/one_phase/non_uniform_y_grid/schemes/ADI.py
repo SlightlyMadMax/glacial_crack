@@ -1,6 +1,6 @@
 from parameters import *
 from linear_algebra.tdma import tdma
-from src.one_phase.nonuniform_y_grid.grid_generation import get_node_coord
+from src.one_phase.non_uniform_y_grid.grid_generation import get_node_coord
 import numpy as np
 
 
@@ -53,7 +53,7 @@ def find_rhs(T, F_new, F_old, j: int, i: int):
     # Вторая производная T по x
     d_xx = T[j, i + 1] - 2.0 * T[j, i] + T[j, i - 1]
 
-    kappa = y * inv_F_new * (inv_dt * (F_new[i] - F_old[i]) + 0.5 * inv_dx * inv_dx * df_dx * df_dx -
+    kappa = y * inv_F_new * (inv_dt * (F_new[i] - F_old[i]) + 0.5 * inv_F_new * inv_dx * inv_dx * df_dx * df_dx -
                              inv_dx * inv_dx * (F_new[i + 1] - 2 * F_new[i] + F_new[i - 1]))
 
     zeta = -2 * y * inv_F_new * df_dx
@@ -61,7 +61,7 @@ def find_rhs(T, F_new, F_old, j: int, i: int):
     return T[j, i] + \
         dt * (d_xx * inv_dx * inv_dx +
               0.5 * zeta * d_xy +
-              0.5 * kappa * d_y)  # 0.5 ?
+              0.5 * kappa * d_y)
 
 
 def solve(T, F_new, F_old):
