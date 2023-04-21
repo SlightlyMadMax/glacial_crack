@@ -8,22 +8,26 @@ def init_f_vector(n_x):
     """
     F = np.empty(n_x)
     # F[:] = a
+    # Парабола
     # for i in range(n_x):
     #     F[i] = a + 2*(i*dx - W/2)*(i*dx - W/2)  # Парабола f(x, t=0) = 3*(x - W/2)^2 + a
+    # Угол
     # for i in range(n_x):
     #     if i*dx < 0.5:
     #         F[i] = 0.8 - i*dx
     #     else:
     #         F[i] = i*dx - 0.2
+    # Параболическая трещина
     for i in range(n_x):
         x = i*dx
         if 0.4 < x < 0.6:
             F[i] = 0.2 + 80*(i*dx - W/2)*(i*dx - W/2)
         else:
             F[i] = 1.0
+    # Угольная трещина
     # for i in range(n_x):
     #     x = i * dx
-    #     if x < 0.4 or x > 0.6:  # Подобие трещины
+    #     if x < 0.4 or x > 0.6:
     #         F[i] = 1.0
     #     else:
     #         F[i] = 3.8 - 7.0 * x if x< 0.5 else 7.0 * x - 3.2
@@ -56,6 +60,8 @@ def recalculate_boundary(F, T):
 
         F_new[i] = F[i] + \
                    dt * inv_gamma * (1.0 + df_dx * df_dx) * (dT_dy_i / F[i] - k_w * dT_dy_w / (k_ice * (H - F[i])))
+
+        # print(f"i = {i}, df_dx = {df_dx}")
 
     df_dx_0 = 0.5 * inv_W * inv_dx * (4.0 * F[1] - 3.0 * F[0] - F[2])
 

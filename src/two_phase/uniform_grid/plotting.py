@@ -21,7 +21,7 @@ def plot_non_transformed(T, F, time: float, graph_id: int):
     fig = plt.figure()
     ax = plt.axes()
     # plt.plot(X, Y, marker=".", color='k', linestyle='none')  # сетка
-    plt.contourf(X, Y, T_0 * T - T_0, 20, cmap="viridis")
+    plt.contourf(X, Y, T_0 * T - T_0, 30, cmap="viridis")
     plt.colorbar()
 
     title = f"time = {str(time)} h\n dx = 1/{str(N_X)} m, dy = 1/{str(N_Y)} m, dt = {str(round(dt * t_0 / 3600.0, 2))} h"

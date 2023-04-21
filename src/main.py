@@ -1,8 +1,8 @@
-from one_phase.non_uniform_y_grid.schemes.ADI import solve
-from one_phase.non_uniform_y_grid.boundary import init_f_vector, recalculate_boundary
-from one_phase.non_uniform_y_grid.temperature import init_temperature
+from two_phase.uniform_grid.schemes.ADI import solve
+from two_phase.uniform_grid.boundary import init_f_vector, recalculate_boundary
+from two_phase.uniform_grid.temperature import init_temperature
 from parameters import *
-from one_phase.plotting import plot_non_transformed
+from two_phase.uniform_grid.plotting import plot_non_transformed
 import numpy as np
 import time
 
@@ -60,16 +60,16 @@ if __name__ == '__main__':
 
         # print("### ТЕМПЕРАТУРА НА НОВОМ ШАГЕ РАССЧИТАНА ###")
         # print("### СОХРАНЯЮ ГРАФИК ###")
-        if t_step % 24 == 0:
-            # plot_non_transformed(
-            #     T=T_new,
-            #     F=F_new,
-            #     time=round(t_step * (dt * t_0/3600.0), 1),
-            #     graph_id=t_step
-            # )
+        if t_step % 10 == 0:
+            plot_non_transformed(
+                T=T_new,
+                F=F_new,
+                time=round(t_step * (dt * t_0/3600.0), 1),
+                graph_id=t_step
+            )
             print(f"Elapsed CPU time: {time.process_time() - start_time}")
-            result.append(F_new[15])
-            print(F_new[15])
+            # result.append(F_new[15])
+            # print(F_new[15])
         t_step = t_step + 1
 
     print("### РАСЧЁТ ЗАВЕРШЁН ###")
