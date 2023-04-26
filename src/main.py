@@ -1,8 +1,10 @@
-from one_phase.temperature import *
-from schemes.ADI import solve
-import numpy as np
+from two_phase.uniform_grid.schemes.ADI import solve
+from two_phase.uniform_grid.boundary import init_f_vector, recalculate_boundary
+from two_phase.uniform_grid.temperature import init_temperature
 from parameters import *
-from plotting import plot_temperature
+from two_phase.uniform_grid.plotting import plot_non_transformed
+import numpy as np
+import time
 
 
 # ВХОДНАЯ ТОЧКА ПРОГРАММЫ
@@ -10,14 +12,15 @@ if __name__ == '__main__':
 
     # Инициализируем положение границы фазового перехода в начальный момент времени
     # в НОВЫХ координатах
-    F = init_f_vector(n_x=int(N_X))
+    F = init_f_vector(n_x=N_X)
 
     # Начальное распределение температуры в НОВЫХ координатах
     T = init_temperature()
 
     # График начального распределения температуры (в исходных координатах)
-    plot_temperature(
-        T=reverse_transform(T, F),  # Преобразуем к исходным координатам
+    plot_non_transformed(
+        T=T,
+        F=F,
         time=0,
         graph_id=0
     )
@@ -32,41 +35,43 @@ if __name__ == '__main__':
 
     K = 2  # Число итераций на одном шаге
     result = []
+
+    start_time = time.process_time()
+
     while t_step < N_t:
         # print("### ВЫЧИСЛЯЮ ПОЛОЖЕНИЕ ГРАНИЦЫ, ШАГ = " + str(t_step) + " ###")
         # print("### ВЫЧИСЛЯЮ ТЕМПЕРАТУРУ, ШАГ = " + str(t_step) + " ###")
 
-        # print("T_old")
-        # print(T_old)
-        # print("F_old")
-        # print(F_old)
         # Итерационный метод
         for k in range(K):
             T_new = solve(
                 T=T_old,
                 F_new=F_new,
                 F_old=F_old,
+                theta=1.0
             )
             F_new = recalculate_boundary(F=F_old, T=T_new)
 
+        if np.amax(F_new) >= H:
+            print("Фазовый переход дошел до верхней границы области.")
+            break
+
         T_old = np.copy(T_new)
         F_old = np.copy(F_new)
-        # print("T_new")
-        # print(T_new)
-        # print("F_new")
-        # print(F_new)
+
         # print("### ТЕМПЕРАТУРА НА НОВОМ ШАГЕ РАССЧИТАНА ###")
         # print("### СОХРАНЯЮ ГРАФИК ###")
-        # time.sleep(10)
-        if t_step % 30 == 0:
-            plot_temperature(
-                T=reverse_transform(T_new, F_new),  # Преобразуем к исходным координатам
+        if t_step % 4 == 0:
+            plot_non_transformed(
+                T=T_new,
+                F=F_new,
                 time=round(t_step * (dt * t_0/3600.0), 1),
                 graph_id=t_step
             )
-            # result.append(F_new[50])
-            # print(F_new[50])
+            # print(f"Elapsed CPU time: {time.process_time() - start_time}")
+            # result.append(F_new[15])
+            # print(F_new[15])
         t_step = t_step + 1
 
     print("### РАСЧЁТ ЗАВЕРШЁН ###")
-    # print(result)
+    print(result)

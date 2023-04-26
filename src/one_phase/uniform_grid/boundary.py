@@ -14,24 +14,12 @@ def init_f_vector(n_x):
         #     F[i] = h
         # else:
         #     F[i] = 1.0 - 1.5*i*dx if i*dx < W/2 else -0.5 + 1.5*i*dx
-
-        if i*dx < 0.2 or i*dx > 0.8:
-            F[i] = 0.8
-        elif 0.4 < i*dx < 0.6:
-            F[i] = 0.2
+        #
+        if i*dx < 0.4 or i*dx > 0.6:
+            F[i] = 1.0
         else:
-            F[i] = 1.4 - 3*i*dx if i*dx < 0.4 else 3*i*dx - 1.6
+            F[i] = 3.8 - 7.0*i*dx if i*dx < 0.5 else 7.0*i*dx - 3.2
     return F
-
-
-def init_temperature():
-    """
-    Задание начального распределения температуры на сетке в НОВЫХ координатах.
-    """
-    T = np.empty((N_Y, N_X))
-    T[:, :] = T_ice/T_0  # Температура льда
-    T[N_Y-1, :] = T_0/T_0  # Температура фазового перехода
-    return T
 
 
 def recalculate_boundary(F, T):
@@ -56,25 +44,3 @@ def recalculate_boundary(F, T):
     F_new[N_X-1] = F[N_X-1] + dt*inv_gamma*(1.0 + (0.5*inv_W*inv_dx*(3.0*F[N_X-1]-4.0*F[N_X-2]+F[N_X-3]))**2) *\
                 (0.5*inv_dy*(3.0 * T[N_Y-1, N_X-1] - 4.0 * T[N_Y-2, N_X-1] + T[N_Y-3, N_X-1]))/F[N_X-1]
     return F_new
-
-
-def reverse_transform(T, F):
-    """
-    Пересчёт температуры в исходные координаты.
-    T – матрица значений температуры на сетке в НОВЫХ координатах.
-    F – вектор значений положения границы фазового перехода.
-    """
-    new_H = int(H*N_Y)
-    new_W = int(W*N_X)
-
-    T_new = np.zeros((new_H, new_W))
-
-    for i in range(N_X):
-        new_x = int(round(i*W))
-        for j in range(N_Y):
-            new_y = int(round(j * F[i]))
-            if new_y < new_H and new_x < int(W*N_X):
-                T_new[new_y, new_x] = T_0*(T[j, i] - 1.0)  # Пересчитываем в ИСХОДНЫЕ координаты и переходим к °С
-
-    return T_new
-
