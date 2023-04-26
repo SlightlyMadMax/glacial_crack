@@ -48,6 +48,7 @@ if __name__ == '__main__':
                 T=T_old,
                 F_new=F_new,
                 F_old=F_old,
+                theta=1.0
             )
             F_new = recalculate_boundary(F=F_old, T=T_new)
 
@@ -60,14 +61,14 @@ if __name__ == '__main__':
 
         # print("### ТЕМПЕРАТУРА НА НОВОМ ШАГЕ РАССЧИТАНА ###")
         # print("### СОХРАНЯЮ ГРАФИК ###")
-        if t_step % 10 == 0:
+        if t_step % 4 == 0:
             plot_non_transformed(
                 T=T_new,
                 F=F_new,
                 time=round(t_step * (dt * t_0/3600.0), 1),
                 graph_id=t_step
             )
-            print(f"Elapsed CPU time: {time.process_time() - start_time}")
+            # print(f"Elapsed CPU time: {time.process_time() - start_time}")
             # result.append(F_new[15])
             # print(F_new[15])
         t_step = t_step + 1
