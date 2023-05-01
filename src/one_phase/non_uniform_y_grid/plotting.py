@@ -23,7 +23,7 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
 
     fig = plt.figure()
     ax = plt.axes()
-    plt.contourf(X, Y, T_0*T - T_0, 30, cmap="viridis")
+    plt.contourf(X, Y, T_0*T - T_0, 100, cmap="viridis")
     plt.colorbar()
 
     if non_uniform:
