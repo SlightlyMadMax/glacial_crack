@@ -5,6 +5,16 @@ from src.one_phase.non_uniform_y_grid.grid_generation import get_node_coord
 
 
 def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = True):
+    """
+    Строит график по двумерному массиву температуры, заданному в НОВЫХ координатах.
+    Осуществляет перевод в исходные координаты, построение и сохранение графика.
+    :param T: двумерный массив температуры
+    :param F: вектор с координатами границы фазового перехода
+    :param time: время в часах
+    :param graph_id: идентификатор или порядковый номер графика
+    :param non_uniform: температура задана на однородной или неоднородной сетке
+    :return: None
+    """
     x = np.linspace(0, 1.0, N_X)
     y = np.empty(N_Y)
 
@@ -40,12 +50,12 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
 
 def plot_temperature(T, time: float, graph_id: int):
     """
-    Построение графика температуры в исходных координатах
-    T – матрица со значениями температуры на двумерной сетке в ИСХОДНЫХ координатах
-    time – время
-    graph_id – id графика
+    Строит график по двумерному массиву температуры, заданному в исходных координатах.
+    :param T: двумерный массив температуры
+    :param time: время в часах
+    :param graph_id: идентификатор или порядковый номер графика
+    :return: None
     """
-
     fig = plt.figure(figsize=(8, 8))
     ax = plt.axes()
     plt.imshow(T
@@ -57,11 +67,7 @@ def plot_temperature(T, time: float, graph_id: int):
                , vmax=0
                )
     plt.colorbar()
-    ax.set_title(
-        'time = ' + str(time) + ' h\n' +
-        'dx = 1/' + str(N_X) + ' m, dy = 1/' + str(N_Y) +
-        ' m, dt = ' + str(round(dt * t_0 / 3600.0, 2)) + ' h'
-    )
+    ax.set_title(f"time = {time} h\ndx = 1/{N_X} m, dy = 1/{N_Y} m, dt = {round(dt * t_0 / 3600.0, 2)} h")
     ax.set_xlabel('x, m')
     ax.set_ylabel('y, m')
     plt.savefig(f"graphs/temperature/T_{str(graph_id)}.png")
