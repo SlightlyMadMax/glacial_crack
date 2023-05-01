@@ -5,7 +5,11 @@ import numpy as np
 
 
 def find_rhs(T, F_new, F_old, j: int, i: int):
+    inv_F_new = 1.0/F_new[i]
+    inv_dx = 1.0/dx
+    inv_dt = 1.0/dt
 
+    # Координата y
     if j == 0:
         y = 0.0
     elif j == N_Y - 1:
@@ -13,12 +17,11 @@ def find_rhs(T, F_new, F_old, j: int, i: int):
     else:
         y = get_node_coord(j / (N_Y - 1))
 
-    inv_F_new = 1.0/F_new[i]
-    inv_dx = 1.0/dx
-    inv_dt = 1.0/dt
-
     # Производная F по x
     df_dx = F_new[i + 1] - F_new[i - 1]
+
+    # Вторая производная T по x
+    d_xx = T[j, i + 1] - 2.0 * T[j, i] + T[j, i - 1]
 
     # Первая и смешанная производная T по y
     if j == 0:
@@ -29,7 +32,6 @@ def find_rhs(T, F_new, F_old, j: int, i: int):
 
         d_xy = ((T[1, i+1]-T[0, i+1]-T[1, i-1]+T[0, i-1])*(h+h_1)*(h+h_1) +
                 (T[2, i-1]-T[0, i-1]-T[2, i+1]+T[0, i+1])*h*h)/(h*h_1*(h+h_1)*dx)
-
     elif j == N_Y - 1:
         h = 1.0 - get_node_coord((N_Y - 2) / (N_Y - 1))
         h_0 = get_node_coord((N_Y - 2) / (N_Y - 1)) - get_node_coord((N_Y - 3) / (N_Y - 1))
@@ -50,13 +52,11 @@ def find_rhs(T, F_new, F_old, j: int, i: int):
         # TODO: second order for d_xy
         d_xy = (T[j + 1, i + 1] - T[j + 1, i - 1] - T[j - 1, i + 1] + T[j - 1, i - 1]) / (dx * (h_0 + h_2))
 
-    # Вторая производная T по x
-    d_xx = T[j, i + 1] - 2.0 * T[j, i] + T[j, i - 1]
-
-    kappa = y * inv_F_new * (inv_dt * (F_new[i] - F_old[i]) + 0.5 * inv_F_new * inv_dx * inv_dx * df_dx * df_dx -
+    kappa = y * inv_F_new * (inv_dt * (F_new[i] - F_old[i]) +
+                             0.5 * inv_F_new * inv_dx * inv_dx * df_dx * df_dx -
                              inv_dx * inv_dx * (F_new[i + 1] - 2 * F_new[i] + F_new[i - 1]))
 
-    zeta = -2 * y * inv_F_new * df_dx
+    zeta = -y * inv_F_new * inv_dx * df_dx
 
     return T[j, i] + \
         dt * (d_xx * inv_dx * inv_dx +
@@ -82,6 +82,7 @@ def solve(T, F_new, F_old):
     rhs = np.empty(N_Y,)
     for i in range(1, N_X - 1):
         inv_F_new = 1.0 / F_new[i]
+        df_dx = F_new[i + 1] - F_new[i - 1]
         for j in range(0, N_Y - 1):
             if j == 0:
                 y = 0.0
@@ -92,9 +93,8 @@ def solve(T, F_new, F_old):
                 h = get_node_coord((j + 1) / (N_Y - 1)) - y
                 h_0 = y - get_node_coord((j - 1) / (N_Y - 1))
 
-            df_dx = F_new[i + 1] - F_new[i - 1]
-
-            sigma_j = W * W * inv_F_new * inv_F_new + (0.5 * y * inv_dx * inv_F_new * df_dx)*(0.5 * y * inv_dx * inv_F_new * df_dx)
+            sigma_j = W * W * inv_F_new * inv_F_new + \
+                      (0.5 * y * inv_dx * inv_F_new * df_dx)*(0.5 * y * inv_dx * inv_F_new * df_dx)
 
             a_y[j] = -2.0 * dt * sigma_j / (h * (h + h_0))
             c_y[j] = -2.0 * dt * sigma_j / (h_0 * (h + h_0))
@@ -116,7 +116,7 @@ def solve(T, F_new, F_old):
             f=rhs
         )
 
-    a = c = np.ones((N_X - 1,)) * inv_dx * inv_dx * -dt
+    a = c = np.ones((N_X - 1,)) * -dt * inv_dx * inv_dx
     b = np.ones((N_X - 1,)) * (1.0 + 2.0 * dt * inv_dx * inv_dx)
 
     alpha_0 = 1.0  # Из левого граничного условия по x (2-го рода)
@@ -144,4 +144,5 @@ def solve(T, F_new, F_old):
             c=c,
             f=rhs
         )
+
     return new_T
