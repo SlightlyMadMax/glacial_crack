@@ -2,7 +2,6 @@ from parameters import *
 from linear_algebra.tdma import tdma
 import numpy as np
 import numba
-from two_phase.uniform_grid.plotting import plot_non_transformed
 
 
 @numba.jit
@@ -30,50 +29,44 @@ def find_rhs(T, F_new, F_old, theta: float, j: int, i: int):
     # Производная F по x
     df_dx = F_new[i + 1] - F_new[i - 1]
 
-    # Первая и вторая производная T по y
-    if j == 0:
-        d_y = 4.0 * T[1, i] - 3.0 * T[0, i] - T[2, i]
-        d_yy = T[2, i] - 2.0 * T[1, i] + T[0, i]
-    elif j == N_Y - 1:
-        d_y = 3.0 * T[N_Y - 1, i] - 4.0 * T[N_Y - 2, i] + T[N_Y - 3, i]
-        d_yy = T[N_Y - 1, i] - 2.0 * T[N_Y - 2, i] + T[N_Y - 3, i]
-    else:
-        d_y = T[j + 1, i] - T[j - 1, i]
-        d_yy = T[j + 1, i] - 2.0 * T[j, i] + T[j - 1, i]
-
     # Вторая производная T по x
     d_xx = T[j, i + 1] - 2.0 * T[j, i] + T[j, i - 1]
 
-    # Смешанная производная T
+    # Производные температуры по y + смешанные
     if j == 0:
+        d_y = 4.0 * T[1, i] - 3.0 * T[0, i] - T[2, i]
+        d_yy = T[2, i] - 2.0 * T[1, i] + T[0, i]
         d_xy = 4.0 * T[1, i + 1] - 3.0 * T[0, i + 1] - T[2, i + 1] - 4.0 * T[1, i - 1] + 3.0 * T[0, i - 1] + T[2, i - 1]
     elif j == N_Y - 1:
+        d_y = 3.0 * T[N_Y - 1, i] - 4.0 * T[N_Y - 2, i] + T[N_Y - 3, i]
+        d_yy = T[N_Y - 1, i] - 2.0 * T[N_Y - 2, i] + T[N_Y - 3, i]
         d_xy = 3.0 * T[N_Y - 1, i + 1] - 4.0 * T[N_Y - 2, i + 1] + T[N_Y - 3, i + 1] - 3.0 * T[N_Y - 1, i - 1] + \
                4 * T[N_Y - 2, i - 1] - T[N_Y - 3, i - 1]
     else:
+        d_y = T[j + 1, i] - T[j - 1, i]
+        d_yy = T[j + 1, i] - 2.0 * T[j, i] + T[j - 1, i]
         d_xy = T[j + 1, i + 1] - T[j + 1, i - 1] - T[j - 1, i + 1] + T[j - 1, i - 1]
 
     # Коэффициенты при производных
     if j < j_int:
-        kappa = j * dy * inv_F * (inv_dt * (F_new[i] - F_old[i]) + 0.5 * inv_F * inv_dx * inv_dx * df_dx * df_dx -
+        kappa = j * dy * inv_F * (inv_dt * (F_new[i] - F_old[i]) +
+                                  0.5 * inv_F * inv_dx * inv_dx * df_dx * df_dx -
                                   inv_dx * inv_dx * (F_new[i + 1] - 2 * F_new[i] + F_new[i - 1]))
         zeta = -j * dy * inv_F * inv_dx * df_dx
-        sigma = (W * W * inv_F * inv_F +
-                 (j * dy * inv_F * 0.5 * inv_dx * df_dx) * (j * dy * inv_F * 0.5 * inv_dx * df_dx))
+        sigma = W * W * inv_F * inv_F + \
+                (0.25 * j * dy * j * dy * inv_F * inv_F * inv_dx * df_dx * inv_dx * df_dx)
     else:
         kappa = inv_FH * (j * dy - 2.0) * (0.5 * inv_FH * inv_dx * inv_dx * df_dx * df_dx / chi +
                                            inv_dx * inv_dx * (F_new[i + 1] - 2 * F_new[i] + F_new[i - 1]) / chi -
                                            inv_dt * (F_new[i] - F_old[i]))
         zeta = (j * dy - 2.0) * inv_FH * inv_dx * df_dx / chi
-        sigma = (W * W * inv_FH * inv_FH +
-                 ((2.0 - j * dy) * inv_FH * 0.5 * inv_dx * df_dx) * ((2.0 - j * dy) * inv_FH * 0.5 * inv_dx * df_dx)) / chi
+        sigma = W * W * inv_FH * inv_FH + \
+                ((2.0 - j * dy) * inv_FH * 0.5 * inv_dx * df_dx) * ((2.0 - j * dy) * inv_FH * 0.5 * inv_dx * df_dx) / chi
 
-    rhs = T[j, i] + dt * (inv_dx * inv_dx * d_xx / chi +
+    return T[j, i] + dt * (inv_dx * inv_dx * d_xx / chi +
                           (1.0 - theta) * sigma * inv_dy * inv_dy * d_yy +
                           0.5 * zeta * inv_dx * inv_dy * d_xy +
                           0.5 * kappa * inv_dy * d_y)
-
-    return rhs
 
 
 def solve(T, F_new, F_old, theta: float):
@@ -106,11 +99,11 @@ def solve(T, F_new, F_old, theta: float):
         for j in range(0, N_Y - 1):
             chi = 1.0 if j <= j_int else c_w * rho_w * k_ice / (c_ice * rho_ice * k_w)  # безразмерный параметр в уравнении теплопроводности
             if j <= j_int:
-                sigma_j = (W * W * inv_F * inv_F +
-                           (0.5 * j * dy * inv_F * inv_dx * df_dx) * (0.5 * j * dy * inv_F * inv_dx * df_dx))
+                sigma_j = W * W * inv_F * inv_F + \
+                          (0.25 * j * dy * j * dy * inv_F * inv_F * inv_dx * df_dx * inv_dx * df_dx)
             else:
-                sigma_j = (W * W * inv_FH * inv_FH +
-                           ((2.0 - j * dy) * inv_FH * 0.5 * inv_dx * df_dx) * ((2.0 - j * dy) * inv_FH * 0.5 * inv_dx * df_dx))
+                sigma_j = W * W * inv_FH * inv_FH + \
+                          0.25 * (2.0 - j * dy) * (2.0 - j * dy) * inv_FH * inv_dx * df_dx * inv_FH * inv_dx * df_dx
 
             # заполняем значения прогоночных коэффициентов
             a_y[j] = c_y[j] = -inv_dy * inv_dy * dt * theta * sigma_j / chi
@@ -144,13 +137,6 @@ def solve(T, F_new, F_old, theta: float):
             f=rhs[j_int:N_Y]
         )
 
-    # plot_non_transformed(
-    #     T=temp_T,
-    #     F=F_new,
-    #     time=1,
-    #     graph_id=1
-    # )
-
     # второй шаг метода переменных направлений
     rhs = np.empty(N_X, )
     for j in range(1, N_Y - 1):
@@ -180,10 +166,5 @@ def solve(T, F_new, F_old, theta: float):
             c=c,
             f=rhs
         )
-    # plot_non_transformed(
-    #     T=new_T,
-    #     F=F_new,
-    #     time=2,
-    #     graph_id=2
-    # )
+
     return new_T

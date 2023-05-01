@@ -10,18 +10,26 @@ def init_f_vector(n_x):
     :return: массив с координатами границы ф.п.
     """
     F = np.empty(n_x)
+
+    # Гладкая ступенька
     F[:] = [0.4 + 0.7 / (1.0 + math.exp(-20.0 * (i * dx - 0.5))) for i in range(0, n_x)]
+
     # Плоскость
     # F[:] = a
+
     # Парабола
     # for i in range(n_x):
     #      F[i] = a + 2*(i*dx - W/2)*(i*dx - W/2)  # Парабола f(x, t=0) = 3*(x - W/2)^2 + a
+
     # Внешний угол
     # F[:] = [0.2 + 0.6*i*dx if i*dx < 0.5 else 0.5 for i in range(n_x)]
+
     # Угол
     # F[:] = [0.8 - i*dx if i*dx < 0.5 else i*dx - 0.2 for i in range(n_x)]
+
     # Трещина-гауссиана
     # F[:] = [1.5 - 0.7*math.exp(-(i*dx - 0.5)**2/0.01) for i in range(n_x)]
+
     # Параболическая трещина
     # for i in range(n_x):
     #     x = i*dx
@@ -29,6 +37,7 @@ def init_f_vector(n_x):
     #         F[i] = 0.2 + 80*(i*dx - W/2)*(i*dx - W/2)
     #     else:
     #         F[i] = 1.0
+
     # Угольная трещина
     # for i in range(n_x):
     #     x = i * dx
