@@ -24,12 +24,12 @@ def plot_non_transformed(T, F, time: float, graph_id: int):
     fig = plt.figure()
     ax = plt.axes()
     # plt.plot(X, Y[j_int, :], marker=".", markersize=0.1, color='red', linestyle='none')  # сетка
-    plt.contourf(X, Y, T_0 * T - T_0, 100, cmap="viridis")
+    plt.contourf(X, Y, T_0 * T - T_0, 50, cmap="viridis")
     plt.colorbar()
 
-    ax.set_title(f"time = {str(time)} h\n dx = 1/{str(N_X)} m, dy = 1/{str(N_Y)} m, dt = {str(round(dt * t_0 / 3600.0, 2))} h")
+    ax.set_title(f"time = {time} h\n dx = 1/{N_X} m, dy = 1/{N_Y} m, dt = {round(dt * t_0 / 3600.0, 2)} h")
     ax.set_xlabel("x, m")
     ax.set_ylabel("y, m")
-    plt.savefig(f"graphs/temperature/T_{str(graph_id)}.png")
+    plt.savefig(f"graphs/temperature/T_{graph_id}.png")
     plt.show()
     # plt.close()

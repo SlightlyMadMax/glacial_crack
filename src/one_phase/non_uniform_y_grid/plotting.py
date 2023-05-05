@@ -37,14 +37,14 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
     plt.colorbar()
 
     if non_uniform:
-        title = f"time = {str(time)} h\n non-uniform grid, dt = {str(round(dt * t_0 / 3600.0, 2))} h"
+        title = f"time = {time} h\n non-uniform grid, dt = {round(dt * t_0 / 3600.0, 2)} h"
     else:
-        title = f"time = {str(time)} h\n dx = 1/{str(N_X)} m, dy = 1/{str(N_Y)} m, dt = {str(round(dt * t_0 / 3600.0, 2))} h"
+        title = f"time = {time} h\n dx = 1/{N_X} m, dy = 1/{N_Y} m, dt = {round(dt * t_0 / 3600.0, 2)} h"
 
     ax.set_title(title)
     ax.set_xlabel("x, m")
     ax.set_ylabel("y, m")
-    plt.savefig(f"graphs/temperature/T_{str(graph_id)}.png")
+    plt.savefig(f"graphs/temperature/T_{graph_id}.png")
     plt.show()
 
 
@@ -70,5 +70,5 @@ def plot_temperature(T, time: float, graph_id: int):
     ax.set_title(f"time = {time} h\ndx = 1/{N_X} m, dy = 1/{N_Y} m, dt = {round(dt * t_0 / 3600.0, 2)} h")
     ax.set_xlabel('x, m')
     ax.set_ylabel('y, m')
-    plt.savefig(f"graphs/temperature/T_{str(graph_id)}.png")
+    plt.savefig(f"graphs/temperature/T_{graph_id}.png")
     plt.show()
