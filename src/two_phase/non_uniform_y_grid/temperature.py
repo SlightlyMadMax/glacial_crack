@@ -1,5 +1,15 @@
 import numpy as np
 from parameters import *
+import math
+
+
+def air_temperature(t: float):
+    """
+    Функция изменения времени на поверхности воды.
+    :param t: Время в секундах
+    :return: Температура на поверхности в заданный момент времени
+    """
+    return T_air + T_amp * math.sin(2 * math.pi * t / (24.0 * 3600.0))
 
 
 def init_temperature():
