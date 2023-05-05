@@ -1,8 +1,8 @@
-from two_phase.uniform_grid.schemes.ADI import solve
-from two_phase.uniform_grid.boundary import init_f_vector, recalculate_boundary
-from two_phase.uniform_grid.temperature import init_temperature
+from two_phase.non_uniform_y_grid.schemes.ADI import solve
+from two_phase.non_uniform_y_grid.boundary import init_f_vector, recalculate_boundary
+from two_phase.non_uniform_y_grid.temperature import init_temperature
 from parameters import *
-from two_phase.uniform_grid.plotting import plot_non_transformed
+from two_phase.non_uniform_y_grid.plotting import plot_non_transformed
 import numpy as np
 import time
 
@@ -48,27 +48,27 @@ if __name__ == '__main__':
                 T=T_old,
                 F_new=F_new,
                 F_old=F_old,
-                theta=1.0
+                time=t_step * dt * t_0
             )
             F_new = recalculate_boundary(F=F_old, T=T_new)
 
-        if np.amax(F_new) >= H:
-            print("Фазовый переход дошел до верхней границы области.")
-            break
+        # if np.amax(F_new) >= H:
+        #     print("Фазовый переход дошел до верхней границы области.")
+        #     break
 
         T_old = np.copy(T_new)
         F_old = np.copy(F_new)
 
         # print("### ТЕМПЕРАТУРА НА НОВОМ ШАГЕ РАССЧИТАНА ###")
         # print("### СОХРАНЯЮ ГРАФИК ###")
-        if t_step % 4 == 0:
+        if t_step % 5 == 0:
             plot_non_transformed(
                 T=T_new,
                 F=F_new,
-                time=round(t_step * (dt * t_0/3600.0), 1),
+                time=t_step * dt * t_0 / 3600.0,
                 graph_id=t_step
             )
-            # print(f"Elapsed CPU time: {time.process_time() - start_time}")
+            print(f"Elapsed CPU time: {time.process_time() - start_time}")
             # result.append(F_new[15])
             # print(F_new[15])
         t_step = t_step + 1
