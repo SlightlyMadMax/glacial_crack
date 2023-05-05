@@ -1,6 +1,7 @@
 import numpy as np
 from parameters import *
 from src.one_phase.non_uniform_y_grid.grid_generation import get_node_coord
+import math
 
 
 def init_f_vector(n_x):
@@ -11,17 +12,23 @@ def init_f_vector(n_x):
     """
     F = np.empty(n_x)
     for i in range(n_x):
+        # Гладкая ступенька
+        # F[:] = [0.2 + 0.5 / (1.0 + math.exp(-20.0 * (i * dx - 0.5))) for i in range(0, n_x)]
+
         # Плоскость
         # F[i] = a
 
         # Парабола f(x, t=0) = 3*(x - W/2)^2 + h
         # F[i] = a + 2*(i*dx - W/2)*(i*dx - W/2)
 
+        # Трещина-гауссиана
+        F[:] = [1.2 - 0.7 * math.exp(-(i * dx - 0.5) ** 2 / 0.01) for i in range(n_x)]
+
         # Подобие трещины
-        if i*dx < 0.4 or i*dx > 0.6:
-            F[i] = 1.0
-        else:
-            F[i] = 3.8 - 7.0*i*dx if i*dx < 0.5 else 7.0*i*dx - 3.2
+        # if i*dx < 0.4 or i*dx > 0.6:
+        #     F[i] = 1.0
+        # else:
+        #     F[i] = 3.8 - 7.0*i*dx if i*dx < 0.5 else 7.0*i*dx - 3.2
 
     return F
 

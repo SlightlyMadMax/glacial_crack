@@ -12,7 +12,7 @@ def init_f_vector(n_x):
     F = np.empty(n_x)
     for i in range(n_x):
         # Гладкая ступенька
-        F[:] = [0.2 + 0.5 / (1.0 + math.exp(-20.0 * (i * dx - 0.5))) for i in range(0, n_x)]
+        # F[:] = [0.2 + 0.5 / (1.0 + math.exp(-20.0 * (i * dx - 0.5))) for i in range(0, n_x)]
 
         # Плоскость
         # F[i] = a
@@ -21,7 +21,7 @@ def init_f_vector(n_x):
         # F[i] = a + 2*(i*dx - W/2)*(i*dx - W/2)
 
         # Трещина-гауссиана
-        # F[:] = [0.8 - 0.7 * math.exp(-(i * dx - 0.5) ** 2 / 0.01) for i in range(n_x)]
+        F[:] = [1.2 - 0.7 * math.exp(-(i * dx - 0.5) ** 2 / 0.01) for i in range(n_x)]
 
         # Подобие трещины
         # if i*dx < 0.4 or i*dx > 0.6:
