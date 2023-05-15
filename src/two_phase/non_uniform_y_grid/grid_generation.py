@@ -1,7 +1,9 @@
 import math
 from parameters import s, N_Y
+import numba
 
 
+@numba.jit
 def get_node_coord(j: int, j_int: int) -> float:
     """
     Функция для генерации неравномерной сетки. Сгущает узлы ближе к фазовой границе.
