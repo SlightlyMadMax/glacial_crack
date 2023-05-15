@@ -1,4 +1,4 @@
-from parameters import W, H, N_X, N_Y, dt, t_0, T_0
+from parameters import W, H, N_X, N_Y, dt, t_0, T_0, s
 import matplotlib.pyplot as plt
 import numpy as np
 from src.two_phase.non_uniform_y_grid.grid_generation import get_node_coord
@@ -35,20 +35,23 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
 
     fig = plt.figure()
     ax = plt.axes()
-    # plt.plot(X[j_int, :], Y[j_int, :], linewidth=1, color='r')  # граница ф.п.
-    plt.plot(X, Y, marker=".", markersize=0.5, color='k', linestyle='none')  # сетка
-    # plt.contourf(X, Y, T_0*T - T_0, 100, cmap="viridis")
-    # plt.colorbar()
+    # plt.plot(X, Y, marker=".", markersize=0.5, color='k', linestyle='none')  # сетка
+    plt.plot(X[j_int, :], Y[j_int, :], linewidth=1, color='r', label='Граница ф.п.')  # граница ф.п.
+    plt.legend(loc="upper right")
+    plt.contourf(X, Y, T_0*T - T_0, 100, cmap="viridis")
+    plt.clim(-5, 5)
+    plt.colorbar()
 
-    if non_uniform:
-        title = f"time = {round(time, 2)} h, T_air = {round(air_temperature(graph_id * dt * t_0) - 273.15, 2)} C" \
-                f"\n non-uniform grid, dt = {round(dt * t_0 / 3600.0, 2)} h"
-    else:
-        title = f"time = {round(time, 2)} h\n dx = 1/{N_X} m, dy = 1/{N_Y} m, dt = {round(dt * t_0 / 3600.0, 2)} h"
+    # if non_uniform:
+    #     title = f"time = {round(time, 2)} h, T_air = {round(air_temperature(graph_id * dt * t_0) - 273.15, 2)} C, " \
+    #             f"non-uniform grid\nN_X = {N_X}, N_Y = {N_Y}, s = {s}, dt = {round(dt * t_0 / 3600.0, 2)} h"
+    # else:
+    #     title = f"time = {round(time, 2)} h\n dx = 1/{N_X} m, dy = 1/{N_Y} m, dt = {round(dt * t_0 / 3600.0, 2)} h"
 
+    title = "Распределение температуры, °C"
     ax.set_title(title)
-    ax.set_xlabel("x, m")
-    ax.set_ylabel("y, m")
-    plt.savefig(f"graphs/temperature/T_{graph_id}.png")
+    ax.set_xlabel("x, м")
+    ax.set_ylabel("y, м")
+    plt.savefig(f"graphs/temperature/T_{graph_id}.eps", format="eps")
     plt.show()
     # plt.close()
