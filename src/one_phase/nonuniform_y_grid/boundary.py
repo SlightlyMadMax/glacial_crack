@@ -1,36 +1,49 @@
 import numpy as np
 from parameters import *
-from src.one_phase.non_uniform_y_grid.grid_generation import get_node_coord
+from src.one_phase.nonuniform_y_grid.grid_generation import get_node_coord
+import math
 
 
 def init_f_vector(n_x):
     """
     Задание начального положения границы фазового перехода.
+    :param n_x: число узлов по x
+    :return: вектор с координатами границы фазового перехода
     """
     F = np.empty(n_x)
     for i in range(n_x):
-        F[i] = a  # Плоскость
+        # Гладкая ступенька
+        # F[:] = [0.2 + 0.5 / (1.0 + math.exp(-20.0 * (i * dx - 0.5))) for i in range(0, n_x)]
 
-        # F[i] = a + 2*(i*dx - W/2)*(i*dx - W/2)  # Парабола f(x, t=0) = 3*(x - W/2)^2 + h
+        # Плоскость
+        # F[i] = a
 
-        # if i*dx < 0.4 or i*dx > 0.6:  # Подобие трещины
+        # Парабола f(x, t=0) = 3*(x - W/2)^2 + h
+        # F[i] = a + 2*(i*dx - W/2)*(i*dx - W/2)
+
+        # Трещина-гауссиана
+        F[:] = [1.2 - 0.7 * math.exp(-(i * dx - 0.5) ** 2 / 0.01) for i in range(n_x)]
+
+        # Подобие трещины
+        # if i*dx < 0.4 or i*dx > 0.6:
         #     F[i] = 1.0
         # else:
         #     F[i] = 3.8 - 7.0*i*dx if i*dx < 0.5 else 7.0*i*dx - 3.2
+
     return F
 
 
 def recalculate_boundary(F, T):
     """
     Пересчёт положения границы фазового перехода в соответствии с условием Стефана в новых координатах.
-    F – вектор значений положения границы фазового перехода.
-    T – матрица значений температуры на сетке в НОВЫХ координатах.
-    dx, dy – шаги по x и y на сетке в НОВЫХ координатах.
+    :param F: вектор значений положения границы фазового перехода
+    :param T: матрица значений температуры на сетке в НОВЫХ координатах
+    :return: вектор с координатами границы фазового перехода
     """
     F_new = np.copy(F)
-    inv_dx = 1.0/dx
-    inv_W = 1.0/W
-    inv_gamma = 1.0/gamma
+    inv_dx = 1.0 / dx
+    inv_W = 1.0 / W
+    inv_gamma = 1.0 / gamma
 
     h = 1.0 - get_node_coord((N_Y - 2) / (N_Y - 1))
     h_0 = get_node_coord((N_Y - 2) / (N_Y - 1)) - get_node_coord((N_Y - 3) / (N_Y - 1))

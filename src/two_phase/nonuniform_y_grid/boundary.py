@@ -1,29 +1,62 @@
 import numpy as np
 from parameters import *
-from src.two_phase.non_uniform_y_grid.grid_generation import get_node_coord
+from src.two_phase.nonuniform_y_grid.grid_generation import get_node_coord
+import math
 
 
 def init_f_vector(n_x):
     """
-    Задание начального положения границы фазового перехода.
+    Инициализация положения границы фазового перехода
+    :param n_x: размерность (число шагов по X)
+    :return: массив с координатами границы ф.п.
     """
     F = np.empty(n_x)
-    for i in range(n_x):
-        if i * dx < 0.4 or i * dx > 0.6:  # Подобие трещины
-            F[i] = 1.0
-        else:
-            F[i] = 3.8 - 7.0 * i * dx if i * dx < 0.5 else 7.0 * i * dx - 3.2
+
+    # Гладкая ступенька
+    # F[:] = [0.2 + 0.5 / (1.0 + math.exp(-20.0 * (i * dx - 0.5))) for i in range(0, n_x)]
+
+    # Плоскость
+    # F[:] = a
+
+    # Парабола
+    # for i in range(n_x):
+    #      F[i] = a + 2*(i*dx - W/2)*(i*dx - W/2)  # Парабола f(x, t=0) = 3*(x - W/2)^2 + a
+
+    # Внешний угол
+    # F[:] = [0.1 + i*dx if i*dx < 0.5 else 1.1 - i*dx for i in range(n_x)]
+
+    # Угол
+    # F[:] = [0.8 - i*dx if i*dx < 0.5 else i*dx - 0.2 for i in range(n_x)]
+
+    # Трещина-гауссиана
+    F[:] = [10.0 - 5.0 * math.exp(-(i * dx - 0.5) ** 2 / 0.001) for i in range(n_x)]
+
+    # Параболическая трещина
+    # for i in range(n_x):
+    #     x = i*dx
+    #     if 0.4 < x < 0.6:
+    #         F[i] = 0.2 + 80*(i*dx - W/2)*(i*dx - W/2)
+    #     else:
+    #         F[i] = 1.0
+
+    # Угольная трещина
+    # for i in range(n_x):
+    #     x = i * dx
+    #     if x < 0.4 or x > 0.6:
+    #         F[i] = 1.0
+    #     else:
+    #         F[i] = 3.8 - 7.0 * x if x< 0.5 else 7.0 * x - 3.2
+
     return F
 
 
 def recalculate_boundary(F, T):
     """
     Пересчёт положения границы фазового перехода в соответствии с условием Стефана в новых координатах.
-    F – вектор значений положения границы фазового перехода.
-    T – матрица значений температуры на сетке в НОВЫХ координатах.
-    dx, dy – шаги по x и y на сетке в НОВЫХ координатах.
+    :param F: вектор значений положения границы фазового перехода
+    :param T: матрица значений температуры на сетке в НОВЫХ координатах
+    :return: вектор с координатами границы фазового перехода
     """
-
     F_new = np.copy(F)
     inv_dx = 1.0 / dx
     inv_W = 1.0 / W
@@ -31,11 +64,11 @@ def recalculate_boundary(F, T):
 
     j_int = int(0.5 * (N_Y - 1))  # координата границы фазового перехода в новых координатах
 
-    h_i = get_node_coord(2 * j_int / (N_Y - 1)) - get_node_coord(2 * (j_int - 1) / (N_Y - 1))
-    h_0_i = get_node_coord(2 * (j_int - 1) / (N_Y - 1)) - get_node_coord(2 * (j_int - 2) / (N_Y - 1))
+    h_i = 1.0 - get_node_coord(j_int - 1, j_int)
+    h_0_i = get_node_coord(j_int - 1, j_int) - get_node_coord(j_int - 2, j_int)
 
-    h_w = get_node_coord(2 * (j_int + 1) / (N_Y - 1)) - get_node_coord(2 * j_int / (N_Y - 1))
-    h_1_w = get_node_coord(2 * (j_int + 2) / (N_Y - 1)) - get_node_coord(2 * (j_int + 1) / (N_Y - 1))
+    h_w = get_node_coord(j_int + 1, j_int) - 1.0
+    h_1_w = get_node_coord(j_int + 2, j_int) - get_node_coord(j_int + 1, j_int)
 
     for i in range(1, N_X - 1):
         df_dx = 0.5 * inv_W * inv_dx * (F[i + 1] - F[i - 1])

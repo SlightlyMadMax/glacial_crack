@@ -1,8 +1,8 @@
-from two_phase.uniform_grid.schemes.ADI import solve
-from two_phase.uniform_grid.boundary import init_f_vector, recalculate_boundary
-from two_phase.uniform_grid.temperature import init_temperature
+from two_phase.nonuniform_y_grid.schemes.ADI import solve
+from two_phase.nonuniform_y_grid.boundary import init_f_vector, recalculate_boundary
+from two_phase.nonuniform_y_grid.temperature import init_temperature
 from parameters import *
-from two_phase.uniform_grid.plotting import plot_non_transformed
+from two_phase.nonuniform_y_grid.plotting import plot_non_transformed
 import numpy as np
 import time
 
@@ -15,7 +15,7 @@ if __name__ == '__main__':
     F = init_f_vector(n_x=N_X)
 
     # Начальное распределение температуры в НОВЫХ координатах
-    T = init_temperature()
+    T = init_temperature(F)
 
     # График начального распределения температуры (в исходных координатах)
     plot_non_transformed(
@@ -48,7 +48,7 @@ if __name__ == '__main__':
                 T=T_old,
                 F_new=F_new,
                 F_old=F_old,
-                theta=1.0
+                time=t_step * dt * t_0
             )
             F_new = recalculate_boundary(F=F_old, T=T_new)
 
@@ -61,14 +61,15 @@ if __name__ == '__main__':
 
         # print("### ТЕМПЕРАТУРА НА НОВОМ ШАГЕ РАССЧИТАНА ###")
         # print("### СОХРАНЯЮ ГРАФИК ###")
-        if t_step % 4 == 0:
+        if t_step % 1800 == 0:
+            print(f"Elapsed CPU time: {time.process_time() - start_time}")
             plot_non_transformed(
                 T=T_new,
                 F=F_new,
-                time=round(t_step * (dt * t_0/3600.0), 1),
+                time=t_step * dt * t_0 / 3600.0,
                 graph_id=t_step
             )
-            # print(f"Elapsed CPU time: {time.process_time() - start_time}")
+            # print(f"Days: {t_step/20}")
             # result.append(F_new[15])
             # print(F_new[15])
         t_step = t_step + 1
