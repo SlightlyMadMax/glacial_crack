@@ -1,8 +1,8 @@
 from parameters import W, H, N_X, N_Y, dt, t_0, T_0, s
 import matplotlib.pyplot as plt
 import numpy as np
-from src.two_phase.non_uniform_y_grid.grid_generation import get_node_coord
-from src.two_phase.non_uniform_y_grid.temperature import air_temperature
+from src.two_phase.nonuniform_xy_grid.grid_generation import get_y_node_coord, get_x_node_coord
+from src.two_phase.nonuniform_y_grid.temperature import air_temperature
 
 
 def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = True):
@@ -16,12 +16,15 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
     :param non_uniform: температура задана на однородной или неоднородной сетке
     :return: None
     """
-    x = np.linspace(0, 1.0, N_X)
+    x = np.empty(N_X)
     y = np.empty(N_Y)
     j_int = int(0.5 * (N_Y - 1))
 
+    for i in range(N_X):
+        x[i] = get_x_node_coord(i)
+
     for j in range(N_Y):
-        y[j] = get_node_coord(j, j_int)
+        y[j] = get_y_node_coord(j, j_int)
 
     X, Y = np.meshgrid(x, y)
 
@@ -39,7 +42,7 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
     plt.plot(X[j_int, :], Y[j_int, :], linewidth=1, color='r', label='Граница ф.п.')  # граница ф.п.
     plt.legend(loc="upper right")
     plt.contourf(X, Y, T_0*T - T_0, 100, cmap="viridis")
-    plt.clim(-5, 5)
+    # plt.clim(-5, 5)
     plt.colorbar()
 
     # if non_uniform:
@@ -52,6 +55,9 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
     ax.set_title(title)
     ax.set_xlabel("x, м")
     ax.set_ylabel("y, м")
-    plt.savefig(f"graphs/temperature/T_{graph_id}.eps", format="eps")
+
+    # plt.savefig(f"graphs/temperature/T_{graph_id}.eps", format="eps")  # сохранить в векторном формате
+    plt.savefig(f"graphs/temperature/T_{graph_id}.png")  # сохранить в растровом формате
+
     plt.show()
     # plt.close()

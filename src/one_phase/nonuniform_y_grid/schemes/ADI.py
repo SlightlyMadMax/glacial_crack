@@ -1,6 +1,6 @@
 from parameters import *
 from linear_algebra.tdma import tdma
-from src.one_phase.non_uniform_y_grid.grid_generation import get_node_coord
+from src.one_phase.nonuniform_y_grid.grid_generation import get_node_coord
 import numpy as np
 
 

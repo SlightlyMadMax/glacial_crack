@@ -1,7 +1,7 @@
 import numpy as np
 from parameters import *
 import math
-from src.two_phase.non_uniform_y_grid.grid_generation import get_node_coord
+from src.two_phase.nonuniform_y_grid.grid_generation import get_node_coord
 import numba
 
 
@@ -25,11 +25,13 @@ def init_temperature(F):
 
     j_int = int(0.5*(N_Y - 1))  # координата границы фазового перехода в новых координатах
 
+    f_max = np.amax(F)
+
     for i in range(N_X):
         for j in range(N_Y):
             if j < j_int:
-                T[j, :] = T_ice / T_0  # задаем температуру льда
-                # T[j, i] = T_ice / T_0 + F[i] * get_node_coord(j, j_int) * (1.0 - T_ice / T_0) / H  # задаем температуру льда
+                # T[j, :] = T_ice / T_0  # задаем температуру льда
+                T[j, i] = T_ice / T_0 + F[i] * get_node_coord(j, j_int) * (1.0 - T_ice / T_0) / f_max  # задаем температуру льда
             else:
                 T[j, :] = T_w / T_0  # задаем температуру воды
                 # T[j, :] = 1.0 + get_node_coord(j, j_int) * (T_w / T_0 - 1.0) / 2.0  # задаем температуру льда

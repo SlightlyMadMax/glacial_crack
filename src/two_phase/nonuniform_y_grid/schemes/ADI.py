@@ -1,9 +1,10 @@
 from parameters import *
 from linear_algebra.tdma import tdma
-from src.two_phase.non_uniform_y_grid.grid_generation import get_node_coord
+from src.two_phase.nonuniform_y_grid.grid_generation import get_node_coord
 import numpy as np
-from src.two_phase.non_uniform_y_grid.temperature import air_temperature
+from src.two_phase.nonuniform_y_grid.temperature import air_temperature
 import numba
+from src.two_phase.nonuniform_y_grid.plotting import plot_non_transformed
 
 
 @numba.jit
@@ -36,10 +37,10 @@ def find_rhs(T, F_new, F_old, j: int, i: int, chi: float):
         h = get_node_coord(j_int + 1, j_int) - 1.0
         h_1 = get_node_coord(j_int + 2, j_int) - get_node_coord(j_int + 1, j_int)
 
-        d_y = ((T[1, i] - T[0, i]) * (h + h_1) * (h + h_1) - (T[2, i] - T[0, i]) * h * h) / (h * h_1 * (h + h_1))
+        d_y = ((T[j_int+1, i] - T[j_int, i]) * (h + h_1) * (h + h_1) - (T[j_int+2, i] - T[j_int, i]) * h * h) / (h * h_1 * (h + h_1))
 
-        d_xy = ((T[1, i+1]-T[0, i+1]-T[1, i-1]+T[0, i-1])*(h+h_1)*(h+h_1) +
-                (T[2, i-1]-T[0, i-1]-T[2, i+1]+T[0, i+1])*h*h)/(h*h_1*(h+h_1)*dx)
+        d_xy = ((T[j_int+1, i+1]-T[j_int, i+1]-T[j_int+1, i-1]+T[j_int, i-1])*(h+h_1)*(h+h_1) +
+                (T[j_int+2, i-1]-T[0, i-1]-T[j_int+2, i+1]+T[j_int, i+1])*h*h)/(h*h_1*(h+h_1)*dx)
     elif j == N_Y - 1:
         h = 2.0 - get_node_coord(N_Y - 2, j_int)
         h_0 = get_node_coord(N_Y - 2, j_int) - get_node_coord(N_Y - 3, j_int)
@@ -52,19 +53,19 @@ def find_rhs(T, F_new, F_old, j: int, i: int, chi: float):
         h = 1.0 - get_node_coord(j_int - 1, j_int)
         h_0 = get_node_coord(j_int - 1, j_int) - get_node_coord(j_int - 2, j_int)
 
-        d_y = ((T[N_Y-1, i] - T[N_Y-2, i])*(h_0 + h)*(h_0 + h) + (T[N_Y-3, i] - T[N_Y-1, i])*h*h)/(h*h_0*(h+h_0))
+        d_y = ((T[j_int, i] - T[j_int-1, i])*(h_0 + h)*(h_0 + h) + (T[j_int-2, i] - T[j_int, i])*h*h)/(h*h_0*(h+h_0))
 
-        d_xy = ((T[N_Y-1, i+1]-T[N_Y-2, i+1]-T[N_Y-1, i-1]+T[N_Y-2, i-1])*(h_0+h)*(h_0+h) +
-                (T[N_Y-3, i+1] - T[N_Y-1, i+1] - T[N_Y-3, i-1] + T[N_Y-1, i-1])*h*h)/(h*h_0*(h+h_0)*dx)
+        d_xy = ((T[j_int, i+1]-T[j_int-1, i+1]-T[j_int, i-1]+T[j_int-1, i-1])*(h_0+h)*(h_0+h) +
+                (T[j_int-2, i+1] - T[j_int, i+1] - T[j_int-2, i-1] + T[j_int, i-1])*h*h)/(h*h_0*(h+h_0)*dx)
     else:
         h = get_node_coord(j + 1, j_int) - y
         h_0 = y - get_node_coord(j - 1, j_int)
-        h_2 = get_node_coord(j + 2, j_int) - get_node_coord(j + 1, j_int)
+        h_2 = get_node_coord(j + 1, j_int) - get_node_coord(j - 1, j_int)
 
         d_y = (T[j + 1, i] * h_0 * h_0 - T[j - 1, i] * h * h + T[j, i] * (h * h - h_0 * h_0))/(h * h_0 * (h + h_0))
 
         # TODO: second order for d_xy
-        d_xy = (T[j + 1, i + 1] - T[j + 1, i - 1] - T[j - 1, i + 1] + T[j - 1, i - 1]) / (dx * (h_0 + h_2))
+        d_xy = (T[j + 1, i + 1] - T[j + 1, i - 1] - T[j - 1, i + 1] + T[j - 1, i - 1]) / (dx * h_2)
 
     if j <= j_int:
         kappa = y * inv_F * (inv_dt * (F_new[i] - F_old[i]) +
@@ -105,15 +106,9 @@ def solve(T, F_new, F_old, time: float):
         df_dx = F_new[i + 1] - F_new[i - 1]
         for j in range(0, N_Y - 1):
             chi = 1.0 if j <= j_int else c_w * rho_w * k_ice / (c_ice * rho_ice * k_w)
-            if j == 0:
-                y = 0.0
-                h = get_node_coord(1, j_int)
-                h_0 = 1.0  # не играет роли
-            else:
-                y = get_node_coord(j, j_int)
-                h = get_node_coord(j + 1, j_int) - y
-                h_0 = y - get_node_coord(j - 1, j_int)
-
+            y = get_node_coord(j, j_int)
+            h = get_node_coord(j + 1, j_int) - y
+            h_0 = y - get_node_coord(j - 1, j_int)
             if j <= j_int:
                 sigma_j = W * W * inv_F * inv_F + \
                           (0.25 * y * y * inv_F * inv_F * inv_dx * df_dx * inv_dx * df_dx)
@@ -163,11 +158,18 @@ def solve(T, F_new, F_old, time: float):
             f=rhs[j_int:N_Y]
         )
 
+    # plot_non_transformed(
+    #     T=temp_T,
+    #     F=F_new,
+    #     time=1,
+    #     graph_id=1
+    # )
+
     rhs = np.empty(N_X,)
     for j in range(1, N_Y - 1):
-        chi = 1.0 if j <= j_int else c_w * rho_w * k_ice / (c_ice * rho_ice * k_w)
-        a = c = np.ones((N_X - 1,)) * inv_dx * inv_dx * -dt / chi
-        b = np.ones((N_X - 1,)) * (1.0 + 2.0 * dt * inv_dx * inv_dx / chi)
+        inv_chi = 1.0 if j <= j_int else (c_ice * rho_ice * k_w) / (c_w * rho_w * k_ice)
+        a = c = np.ones((N_X - 1,)) * inv_dx * inv_dx * -dt * inv_chi
+        b = np.ones((N_X - 1,)) * (1.0 + 2.0 * dt * inv_dx * inv_dx * inv_chi)
         for i in range(0, N_X):
             if i == 0:
                 d_xx = T[j, 2] - 2.0 * T[j, 1] + T[j, 0]
@@ -176,7 +178,7 @@ def solve(T, F_new, F_old, time: float):
             else:
                 d_xx = T[j, i + 1] - 2.0 * T[j, i] + T[j, i - 1]
 
-            rhs[i] = temp_T[j, i] - dt * inv_dx * inv_dx * d_xx / chi
+            rhs[i] = temp_T[j, i] - dt * inv_dx * inv_dx * d_xx * inv_chi
 
         new_T[j, :] = tdma(
             alpha_0=1.0,  # Из левого граничного условия по x (2-го рода)
@@ -188,5 +190,12 @@ def solve(T, F_new, F_old, time: float):
             c=c,
             f=rhs
         )
+
+    # plot_non_transformed(
+    #     T=new_T,
+    #     F=F_new,
+    #     time=2,
+    #     graph_id=2
+    # )
 
     return new_T
