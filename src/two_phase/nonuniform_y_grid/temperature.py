@@ -1,8 +1,8 @@
 import numpy as np
-from parameters import *
 import math
-from src.two_phase.nonuniform_y_grid.grid_generation import get_node_coord
 import numba
+from parameters import *
+from two_phase.nonuniform_y_grid.grid_generation import get_node_coord
 
 
 @numba.jit

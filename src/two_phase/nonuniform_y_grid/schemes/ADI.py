@@ -1,10 +1,10 @@
 from parameters import *
 from linear_algebra.tdma import tdma
-from src.two_phase.nonuniform_y_grid.grid_generation import get_node_coord
+from two_phase.nonuniform_y_grid.grid_generation import get_node_coord
+from two_phase.nonuniform_y_grid.temperature import air_temperature
 import numpy as np
-from src.two_phase.nonuniform_y_grid.temperature import air_temperature
 import numba
-from src.two_phase.nonuniform_y_grid.plotting import plot_non_transformed
+from two_phase.nonuniform_y_grid.plotting import plot_non_transformed
 
 
 @numba.jit
@@ -88,8 +88,6 @@ def find_rhs(T, F_new, F_old, j: int, i: int, chi: float):
 def solve(T, F_new, F_old, time: float):
     temp_T = np.copy(T)
     new_T = np.copy(T)
-    # F_new = np.copy(F_new)
-    # F_old = np.copy(F_old)
     j_int = int(0.5 * (N_Y - 1))
     inv_dx = 1.0 / dx
 

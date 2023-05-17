@@ -1,6 +1,6 @@
 import math
-from parameters import s, N_Y
 import numba
+from parameters import s, N_Y
 
 
 @numba.jit

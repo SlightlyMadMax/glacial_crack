@@ -1,8 +1,8 @@
 from two_phase.nonuniform_y_grid.schemes.ADI import solve
 from two_phase.nonuniform_y_grid.boundary import init_f_vector, recalculate_boundary
 from two_phase.nonuniform_y_grid.temperature import init_temperature
-from parameters import *
 from two_phase.nonuniform_y_grid.plotting import plot_non_transformed
+from parameters import *
 import numpy as np
 import time
 
@@ -34,7 +34,6 @@ if __name__ == '__main__':
     F_old = np.copy(F)
 
     K = 2  # Число итераций на одном шаге
-    result = []
 
     start_time = time.process_time()
 
@@ -77,14 +76,6 @@ if __name__ == '__main__':
                   f" data/f_and_temp_at_{t_step}.npz ###")
             np.savez_compressed(f"data/f_and_temp_at_{t_step}", F=F_new, T=T_new)
 
-            loaded = np.load(f"data/f_and_temp_at_{t_step}.npz")
-            print(np.array_equal(F_new, loaded['F']))
-            print(np.array_equal(T_new, loaded['T']))
-
-            # print(f"Days: {t_step/20}")
-            # result.append(F_new[15])
-            # print(F_new[15])
         t_step = t_step + 1
 
     print("### РАСЧЁТ ЗАВЕРШЁН ###")
-    print(result)
