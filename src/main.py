@@ -53,22 +53,34 @@ if __name__ == '__main__':
             F_new = recalculate_boundary(F=F_old, T=T_new)
 
         if np.amax(F_new) >= H:
-            print("Фазовый переход дошел до верхней границы области.")
+            print("### ФАЗОВЫЙ ПЕРЕХОД ДОШЕЛ ДО ВЕРХНЕЙ ГРАНИЦЫ ОБЛАСТИ ###")
             break
 
         T_old = np.copy(T_new)
         F_old = np.copy(F_new)
 
         # print("### ТЕМПЕРАТУРА НА НОВОМ ШАГЕ РАССЧИТАНА ###")
-        # print("### СОХРАНЯЮ ГРАФИК ###")
-        if t_step % 1800 == 0:
-            print(f"Elapsed CPU time: {time.process_time() - start_time}")
+        if t_step % 180 == 0:
+            print(f"### ELAPSED CPU TIME: {time.process_time() - start_time} ###")
+
+            model_time = round(t_step * dt * t_0 / 3600.0, 2)
+
+            print("### СОХРАНЯЮ ГРАФИК ###")
             plot_non_transformed(
                 T=T_new,
                 F=F_new,
-                time=t_step * dt * t_0 / 3600.0,
+                time=model_time,
                 graph_id=t_step
             )
+
+            print(f"### СОХРАНЯЮ ПОЛОЖЕНИЕ ГРАНИЦЫ И ТЕМПЕРАТУРНОЕ РАСПРЕДЕЛЕНИЕ В АРХИВ"
+                  f" data/f_and_temp_at_{t_step}.npz ###")
+            np.savez_compressed(f"data/f_and_temp_at_{t_step}", F=F_new, T=T_new)
+
+            loaded = np.load(f"data/f_and_temp_at_{t_step}.npz")
+            print(np.array_equal(F_new, loaded['F']))
+            print(np.array_equal(T_new, loaded['T']))
+
             # print(f"Days: {t_step/20}")
             # result.append(F_new[15])
             # print(F_new[15])
