@@ -1,7 +1,7 @@
+import math
 import numpy as np
 from parameters import *
-from src.two_phase.nonuniform_y_grid.grid_generation import get_node_coord
-import math
+from two_phase.nonuniform_y_grid.grid_generation import get_node_coord
 
 
 def init_f_vector(n_x):

@@ -42,7 +42,7 @@ plt.ylim(s0, s0+0.13)
 plt.xlim(0, 36)
 plt.ylabel('d, m')
 plt.xlabel('t, дни')
-plt.savefig('../../graphs/comparison/1d.eps', format="eps")
+plt.savefig('../../graphs/comparison/two_phase/1d.eps', format="eps")
 plt.show()
 
 # plt.clf()

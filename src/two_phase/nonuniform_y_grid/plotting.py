@@ -1,8 +1,8 @@
 from parameters import W, H, N_X, N_Y, dt, t_0, T_0, s
 import matplotlib.pyplot as plt
 import numpy as np
-from src.two_phase.nonuniform_y_grid.grid_generation import get_node_coord
-from src.two_phase.nonuniform_y_grid.temperature import air_temperature
+from two_phase.nonuniform_y_grid.grid_generation import get_node_coord
+from two_phase.nonuniform_y_grid.temperature import air_temperature
 
 
 def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = True):
@@ -49,12 +49,12 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
     # plt.clim(-5, 5)
 
     if non_uniform:
-        title = f"time = {round(time, 2)} h, T_air = {round(air_temperature(graph_id * dt * t_0) - 273.15, 2)} C, " \
+        title = f"time = {time} h, T_air = {round(air_temperature(graph_id * dt * t_0) - 273.15, 2)} C, " \
                 f"non-uniform grid\nN_X = {N_X}, N_Y = {N_Y}, s = {s}, dt = {round(dt * t_0 / 3600.0, 2)} h"
     else:
-        title = f"time = {round(time, 2)} h\n dx = 1/{N_X} m, dy = 1/{N_Y} m, dt = {round(dt * t_0 / 3600.0, 2)} h"
+        title = f"time = {time} h\n dx = 1/{N_X} m, dy = 1/{N_Y} m, dt = {round(dt * t_0 / 3600.0, 2)} h"
 
-    title = f"Распределение температуры, °C,\ntime = {round(time, 2)} h, T_air = {round(air_temperature(graph_id * dt * t_0) - 273.15, 2)} C."
+    title = f"Распределение температуры, °C,\ntime = {time} h, T_air = {round(air_temperature(graph_id * dt * t_0) - 273.15, 2)} C."
     ax.set_title(title)
     ax.set_xlabel("x, м")
     ax.set_ylabel("y, м")

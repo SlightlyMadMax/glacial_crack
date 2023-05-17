@@ -1,8 +1,8 @@
 from two_phase.nonuniform_y_grid.schemes.ADI import solve
 from two_phase.nonuniform_y_grid.boundary import init_f_vector, recalculate_boundary
 from two_phase.nonuniform_y_grid.temperature import init_temperature
-from parameters import *
 from two_phase.nonuniform_y_grid.plotting import plot_non_transformed
+from parameters import *
 import numpy as np
 import time
 
@@ -34,7 +34,6 @@ if __name__ == '__main__':
     F_old = np.copy(F)
 
     K = 2  # Число итераций на одном шаге
-    result = []
 
     start_time = time.process_time()
 
@@ -53,26 +52,30 @@ if __name__ == '__main__':
             F_new = recalculate_boundary(F=F_old, T=T_new)
 
         if np.amax(F_new) >= H:
-            print("Фазовый переход дошел до верхней границы области.")
+            print("### ФАЗОВЫЙ ПЕРЕХОД ДОШЕЛ ДО ВЕРХНЕЙ ГРАНИЦЫ ОБЛАСТИ ###")
             break
 
         T_old = np.copy(T_new)
         F_old = np.copy(F_new)
 
         # print("### ТЕМПЕРАТУРА НА НОВОМ ШАГЕ РАССЧИТАНА ###")
-        # print("### СОХРАНЯЮ ГРАФИК ###")
-        if t_step % 1800 == 0:
-            print(f"Elapsed CPU time: {time.process_time() - start_time}")
+        if t_step % 180 == 0:
+            print(f"### ELAPSED CPU TIME: {time.process_time() - start_time} ###")
+
+            model_time = round(t_step * dt * t_0 / 3600.0, 2)
+
+            print("### СОХРАНЯЮ ГРАФИК ###")
             plot_non_transformed(
                 T=T_new,
                 F=F_new,
-                time=t_step * dt * t_0 / 3600.0,
+                time=model_time,
                 graph_id=t_step
             )
-            # print(f"Days: {t_step/20}")
-            # result.append(F_new[15])
-            # print(F_new[15])
+
+            print(f"### СОХРАНЯЮ ПОЛОЖЕНИЕ ГРАНИЦЫ И ТЕМПЕРАТУРНОЕ РАСПРЕДЕЛЕНИЕ В АРХИВ"
+                  f" data/f_and_temp_at_{t_step}.npz ###")
+            np.savez_compressed(f"data/f_and_temp_at_{t_step}", F=F_new, T=T_new)
+
         t_step = t_step + 1
 
     print("### РАСЧЁТ ЗАВЕРШЁН ###")
-    print(result)
