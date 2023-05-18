@@ -1,6 +1,5 @@
 from parameters import *
 from linear_algebra.tdma import tdma
-from two_phase.nonuniform_y_grid.grid_generation import get_node_coord
 from two_phase.nonuniform_y_grid.temperature import air_temperature
 import numpy as np
 import numba
@@ -8,7 +7,7 @@ from two_phase.nonuniform_y_grid.plotting import plot_non_transformed
 
 
 @numba.jit
-def find_rhs(T, F_new, F_old, j: int, i: int, chi: float):
+def find_rhs(T, F_new, F_old, Y, j: int, i: int, chi: float):
     inv_F = 1.0 / F_new[i]
     inv_FH = 1.0 / (H - F_new[i])
     inv_dx = 1.0 / dx
@@ -16,7 +15,7 @@ def find_rhs(T, F_new, F_old, j: int, i: int, chi: float):
     j_int = int(0.5 * (N_Y - 1))
 
     # Координата y
-    y = get_node_coord(j, j_int)
+    y = Y[j]
 
     # Производная F по x
     df_dx = F_new[i + 1] - F_new[i - 1]
@@ -26,41 +25,41 @@ def find_rhs(T, F_new, F_old, j: int, i: int, chi: float):
 
     # Первая и смешанная производная T по y
     if j == 0:
-        h = get_node_coord(1, j_int)
-        h_1 = get_node_coord(2, j_int) - h
+        h = Y[1]
+        h_1 = Y[2] - h
 
         d_y = ((T[1, i] - T[0, i]) * (h + h_1) * (h + h_1) - (T[2, i] - T[0, i]) * h * h) / (h * h_1 * (h + h_1))
 
         d_xy = ((T[1, i+1]-T[0, i+1]-T[1, i-1]+T[0, i-1])*(h+h_1)*(h+h_1) +
                 (T[2, i-1]-T[0, i-1]-T[2, i+1]+T[0, i+1])*h*h)/(h*h_1*(h+h_1)*dx)
     elif j == j_int and chi != 1.0:
-        h = get_node_coord(j_int + 1, j_int) - 1.0
-        h_1 = get_node_coord(j_int + 2, j_int) - get_node_coord(j_int + 1, j_int)
+        h = Y[j_int+1] - 1.0
+        h_1 = Y[j_int+2] - Y[j_int+1]
 
         d_y = ((T[j_int+1, i] - T[j_int, i]) * (h + h_1) * (h + h_1) - (T[j_int+2, i] - T[j_int, i]) * h * h) / (h * h_1 * (h + h_1))
 
         d_xy = ((T[j_int+1, i+1]-T[j_int, i+1]-T[j_int+1, i-1]+T[j_int, i-1])*(h+h_1)*(h+h_1) +
                 (T[j_int+2, i-1]-T[0, i-1]-T[j_int+2, i+1]+T[j_int, i+1])*h*h)/(h*h_1*(h+h_1)*dx)
     elif j == N_Y - 1:
-        h = 2.0 - get_node_coord(N_Y - 2, j_int)
-        h_0 = get_node_coord(N_Y - 2, j_int) - get_node_coord(N_Y - 3, j_int)
+        h = 2.0 - Y[N_Y-2]
+        h_0 = Y[N_Y-2] - Y[N_Y-3]
 
         d_y = ((T[N_Y-1, i] - T[N_Y-2, i])*(h_0 + h)*(h_0 + h) + (T[N_Y-3, i] - T[N_Y-1, i])*h*h)/(h*h_0*(h+h_0))
 
         d_xy = ((T[N_Y-1, i+1]-T[N_Y-2, i+1]-T[N_Y-1, i-1]+T[N_Y-2, i-1])*(h_0+h)*(h_0+h) +
                 (T[N_Y-3, i+1] - T[N_Y-1, i+1] - T[N_Y-3, i-1] + T[N_Y-1, i-1])*h*h)/(h*h_0*(h+h_0)*dx)
     elif j == j_int and chi == 1.0:
-        h = 1.0 - get_node_coord(j_int - 1, j_int)
-        h_0 = get_node_coord(j_int - 1, j_int) - get_node_coord(j_int - 2, j_int)
+        h = 1.0 - Y[j_int-1]
+        h_0 = Y[j_int-1] - Y[j_int-2]
 
         d_y = ((T[j_int, i] - T[j_int-1, i])*(h_0 + h)*(h_0 + h) + (T[j_int-2, i] - T[j_int, i])*h*h)/(h*h_0*(h+h_0))
 
         d_xy = ((T[j_int, i+1]-T[j_int-1, i+1]-T[j_int, i-1]+T[j_int-1, i-1])*(h_0+h)*(h_0+h) +
                 (T[j_int-2, i+1] - T[j_int, i+1] - T[j_int-2, i-1] + T[j_int, i-1])*h*h)/(h*h_0*(h+h_0)*dx)
     else:
-        h = get_node_coord(j + 1, j_int) - y
-        h_0 = y - get_node_coord(j - 1, j_int)
-        h_2 = get_node_coord(j + 1, j_int) - get_node_coord(j - 1, j_int)
+        h = Y[j+1] - y
+        h_0 = y - Y[j-1]
+        h_2 = Y[j+1] - Y[j-1]
 
         d_y = (T[j + 1, i] * h_0 * h_0 - T[j - 1, i] * h * h + T[j, i] * (h * h - h_0 * h_0))/(h * h_0 * (h + h_0))
 
@@ -85,7 +84,7 @@ def find_rhs(T, F_new, F_old, j: int, i: int, chi: float):
 
 
 @numba.jit
-def solve(T, F_new, F_old, time: float):
+def solve(T, F_new, F_old, Y, time: float):
     temp_T = np.copy(T)
     new_T = np.copy(T)
     j_int = int(0.5 * (N_Y - 1))
@@ -103,25 +102,24 @@ def solve(T, F_new, F_old, time: float):
         inv_FH = 1.0 / (H - F_new[i])
         df_dx = F_new[i + 1] - F_new[i - 1]
         for j in range(0, N_Y - 1):
-            chi = 1.0 if j <= j_int else c_w * rho_w * k_ice / (c_ice * rho_ice * k_w)
-            y = get_node_coord(j, j_int)
-            h = get_node_coord(j + 1, j_int) - y
-            h_0 = y - get_node_coord(j - 1, j_int)
+            chi = 1.0 if j <= j_int else (c_w * rho_w * k_ice) / (c_ice * rho_ice * k_w)
+            y = Y[j]
+            h = Y[j+1] - y
+            h_0 = y - Y[j-1]
             if j <= j_int:
                 sigma_j = W * W * inv_F * inv_F + \
                           (0.25 * y * y * inv_F * inv_F * inv_dx * df_dx * inv_dx * df_dx)
             else:
                 sigma_j = W * W * inv_FH * inv_FH + \
-                          0.25 * (2.0 - y) * (2.0 - y) * inv_FH * inv_dx * df_dx * inv_FH * inv_dx * df_dx
+                          0.25 * (2.0 - y) * (2.0 - y) * inv_FH * inv_FH * inv_dx * df_dx * inv_dx * df_dx
+            a_y[j] = -2.0 * dt * sigma_j / (chi * h * (h + h_0))
+            c_y[j] = -2.0 * dt * sigma_j / (chi * h_0 * (h + h_0))
+            b_y[j] = 1.0 + 2.0 * dt * sigma_j / (chi * h * h_0)
 
-            a_y[j] = -2.0 * dt * sigma_j / (chi * (h * (h + h_0)))
-            c_y[j] = -2.0 * dt * sigma_j / (chi * (h_0 * (h + h_0)))
-            b_y[j] = 1.0 + 2.0 * dt * sigma_j / (chi * (h * h_0))
+            rhs[j] = find_rhs(T, F_new, F_old, Y, j, i, chi)
 
-            rhs[j] = find_rhs(T, F_new, F_old, j, i, chi)
-
-        chi = c_w * rho_w * k_ice / (c_ice * rho_ice * k_w)
-        rhs[N_Y-1] = find_rhs(T, F_new, F_old, N_Y-1, i, chi)
+        chi = (c_w * rho_w * k_ice) / (c_ice * rho_ice * k_w)
+        rhs[N_Y-1] = find_rhs(T, F_new, F_old, Y, N_Y-1, i, chi)
 
         # ПРОГОНКА ДЛЯ ЛЬДА (первый шаг метода переменных направлений)
         temp_T[0:j_int + 1, i] = tdma(
@@ -135,14 +133,14 @@ def solve(T, F_new, F_old, time: float):
             f=rhs[0:j_int + 1]
         )
 
-        h = get_node_coord(j_int + 1, j_int) - 1.0
-        h_0 = 1.0
-        sigma_j = W * W * inv_FH * inv_FH + 0.25 * inv_FH * inv_dx * df_dx * inv_FH * inv_dx * df_dx
-        a_y[j_int] = -2.0 * dt * sigma_j / (chi * (h * (h + h_0)))
-        c_y[j_int] = -2.0 * dt * sigma_j / (chi * (h_0 * (h + h_0)))
-        b_y[j_int] = 1.0 + 2.0 * dt * sigma_j / (chi * (h * h_0))
+        # h = Y[j_int+1] - 1.0
+        # h_0 = 1.0
+        # sigma_j = W * W * inv_FH * inv_FH + 0.25 * inv_FH * inv_dx * df_dx * inv_FH * inv_dx * df_dx
+        # a_y[j_int] = -2.0 * dt * sigma_j / (chi * (h * (h + h_0)))
+        # c_y[j_int] = -2.0 * dt * sigma_j / (chi * (h_0 * (h + h_0)))
+        # b_y[j_int] = 1.0 + 2.0 * dt * sigma_j / (chi * (h * h_0))
 
-        rhs[j_int] = find_rhs(T, F_new, F_old, j_int, i, chi)
+        rhs[j_int] = find_rhs(T, F_new, F_old, Y, j_int, i, chi)
 
         # ПРОГОНКА ДЛЯ ВОДЫ (первый шаг метода переменных направлений)
         temp_T[j_int:N_Y, i] = tdma(
