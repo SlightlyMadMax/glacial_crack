@@ -41,38 +41,38 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
     # plt.legend(loc="upper right")
     plt.contourf(X, Y, T_0*T - T_0, 100, cmap="viridis")
 
-    plt.ylim((4.5, 10.05))
-    plt.xlim((0.3, 0.7))
+    # plt.ylim((4.5, 10.05))
+    # plt.xlim((0.3, 0.7))
 
 
     plt.colorbar()
     # plt.clim(-5, 5)
 
-    if non_uniform:
-        title = f"time = {time} h, T_air = {round(air_temperature(graph_id * dt * t_0) - 273.15, 2)} C, " \
-                f"non-uniform grid\nN_X = {N_X}, N_Y = {N_Y}, s = {s}, dt = {round(dt * t_0 / 3600.0, 2)} h"
-    else:
-        title = f"time = {time} h\n dx = 1/{N_X} m, dy = 1/{N_Y} m, dt = {round(dt * t_0 / 3600.0, 2)} h"
-
-    title = f"Распределение температуры, °C,\ntime = {time} h, T_air = {round(air_temperature(graph_id * dt * t_0) - 273.15, 2)} C."
-    ax.set_title(title)
+    # if non_uniform:
+    #     title = f"time = {time} h, T_air = {round(air_temperature(graph_id * dt * t_0) - 273.15, 2)} C, " \
+    #             f"non-uniform grid\nN_X = {N_X}, N_Y = {N_Y}, s = {s}, dt = {round(dt * t_0 / 3600.0, 2)} h"
+    # else:
+    #     title = f"time = {time} h\n dx = 1/{N_X} m, dy = 1/{N_Y} m, dt = {round(dt * t_0 / 3600.0, 2)} h"
+    #
+    # title = f"Распределение температуры, °C,\ntime = {time} h, T_air = {round(air_temperature(graph_id * dt * t_0) - 273.15, 2)} C."
+    # ax.set_title(title)
     ax.set_xlabel("x, м")
     ax.set_ylabel("y, м")
 
     # plt.savefig(f"graphs/temperature/T_{graph_id}.eps", format="eps")  # сохранить в векторном формате
     plt.savefig(f"graphs/temperature/T_{graph_id}.png")  # сохранить в растровом формате
 
-    ax.set_aspect("equal")
+    # ax.set_aspect("equal")
+    #
+    # plt.ylim((9.90, 10.05))
+    # plt.xlim((0.3, 0.7))
+    #
+    # plt.savefig(f"graphs/temperature/above_water_{graph_id}.png")
+    #
+    # plt.ylim((9.90, 10.05))
+    # plt.xlim((0.3, 0.45))
+    #
+    # plt.savefig(f"graphs/temperature/left_water_{graph_id}.png")
 
-    plt.ylim((9.90, 10.05))
-    plt.xlim((0.3, 0.7))
-
-    plt.savefig(f"graphs/temperature/above_water_{graph_id}.png")
-
-    plt.ylim((9.90, 10.05))
-    plt.xlim((0.3, 0.45))
-
-    plt.savefig(f"graphs/temperature/left_water_{graph_id}.png")
-
-    # plt.show()
-    plt.close()
+    plt.show()
+    # plt.close()

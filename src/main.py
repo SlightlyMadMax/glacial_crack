@@ -25,6 +25,8 @@ if __name__ == '__main__':
         graph_id=0
     )
 
+    np.savez_compressed("data/f_and_temp_at_0", F=F, T=T)
+
     t_step = 1  # Номер шага по времени
 
     # Инициализируем переменные для температуры и положения свободной границы на новом шаге по времени
@@ -51,15 +53,15 @@ if __name__ == '__main__':
             )
             F_new = recalculate_boundary(F=F_old, T=T_new)
 
-        if np.amax(F_new) >= H:
-            print("### ФАЗОВЫЙ ПЕРЕХОД ДОШЕЛ ДО ВЕРХНЕЙ ГРАНИЦЫ ОБЛАСТИ ###")
+        if np.amax(F_new) >= H or np.amin(F_new) <= 0:
+            print("### ФАЗОВЫЙ ПЕРЕХОД ДОШЕЛ ДО ГРАНИЦЫ ОБЛАСТИ ###")
             break
 
         T_old = np.copy(T_new)
         F_old = np.copy(F_new)
 
         # print("### ТЕМПЕРАТУРА НА НОВОМ ШАГЕ РАССЧИТАНА ###")
-        if t_step % 180 == 0:
+        if t_step % 480 == 0:
             print(f"### ELAPSED CPU TIME: {time.process_time() - start_time} ###")
 
             model_time = round(t_step * dt * t_0 / 3600.0, 2)
