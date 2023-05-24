@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+plt.rcParams.update({'font.size': 12})
+
 loaded_0 = np.load('../../data/1/f_and_temp_at_0.npz')
 loaded_1 = np.load('../../data/1/f_and_temp_at_1200.npz')
 loaded_2 = np.load('../../data/1/f_and_temp_at_3600.npz')
@@ -44,5 +46,6 @@ ax2.legend()
 ax2.set_ylabel('y, м')
 ax2.set_xlabel('x, м')
 
-plt.savefig('../../graphs/comparison/two_phase/1d_comp.png')
-plt.savefig('../../graphs/comparison/two_phase/1d_comp.eps', format="eps")
+# plt.savefig('../../graphs/comparison/two_phase/1d_comp.png')
+# plt.savefig('../../graphs/comparison/two_phase/1d_comp.eps', format="eps")
+plt.savefig('../../graphs/comparison/two_phase/1d_comp.tiff', dpi=300, format='tiff')

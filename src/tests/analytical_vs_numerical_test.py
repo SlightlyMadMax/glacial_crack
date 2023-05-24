@@ -36,12 +36,13 @@ for i in range(1, 36):
     error.append(100*abs(num[i]-boundary(ts[i]))/(boundary(ts[i])-10.0))
 
 plt.plot(ts, num, 'r', lw=0.5, label='Численное решение')
-plt.plot(ts, boundary(ts), 'k', lw=0.5, label='Аналитическая формула')
+plt.plot(ts, boundary(ts), 'k', lw=0.5, label='Полуэмпирическая формула')
 plt.legend()
 plt.ylim(s0, s0+0.13)
 plt.xlim(0, 36)
 plt.ylabel('d, m')
 plt.xlabel('t, дни')
+plt.savefig('../../graphs/comparison/two_phase/1d.png')
 plt.savefig('../../graphs/comparison/two_phase/1d.eps', format="eps")
 plt.show()
 
