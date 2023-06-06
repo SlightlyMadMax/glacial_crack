@@ -26,7 +26,7 @@ if __name__ == '__main__':
         graph_id=0
     )
 
-    np.savez_compressed("data/f_and_temp_at_0", F=F, T=T)
+    # np.savez_compressed("data/small_crack/f_and_temp_at_0", F=F, T=T)
 
     # Инициализируем переменные для температуры и положения свободной границы на новом шаге по времени
     T_new = np.copy(T)
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     K = 2  # Число итераций на одном шаге
 
     start_time = time.process_time()  # Начальное время расчетов
-
+    # result = []
     while t_step < N_t:
         # print("### ВЫЧИСЛЯЮ ПОЛОЖЕНИЕ ГРАНИЦЫ, ШАГ = " + str(t_step) + " ###")
         # print("### ВЫЧИСЛЯЮ ТЕМПЕРАТУРУ, ШАГ = " + str(t_step) + " ###")
@@ -70,12 +70,12 @@ if __name__ == '__main__':
         F_old = np.copy(F_new)
 
         # print("### ТЕМПЕРАТУРА НА НОВОМ ШАГЕ РАССЧИТАНА ###")
-        if t_step % 7200 == 0:
-            print(f"### ВРЕМЯ ВЫПОЛНЕНИЯ: {time.process_time() - start_time} ###")
+        if t_step % 1 == 0:
+            # print(f"### ВРЕМЯ ВЫПОЛНЕНИЯ: {time.process_time() - start_time} ###")
 
             model_time = round(t_step * dt * t_0 / 3600.0, 2)
 
-            print("### СОХРАНЯЮ ГРАФИК ###")
+            # print("### СОХРАНЯЮ ГРАФИК ###")
             plot_non_transformed(
                 T=T_new,
                 F=F_new,
@@ -83,10 +83,14 @@ if __name__ == '__main__':
                 graph_id=t_step
             )
 
-            print(f"### СОХРАНЯЮ ПОЛОЖЕНИЕ ГРАНИЦЫ И ТЕМПЕРАТУРНОЕ РАСПРЕДЕЛЕНИЕ В АРХИВ"
-                  f" data/f_and_temp_at_{t_step}.npz ###")
-            np.savez_compressed(f"data/f_and_temp_at_{t_step}", F=F_new, T=T_new)
+            # print(F_new[15])
+            # result.append(F_new[15])
+            # print(f"### СОХРАНЯЮ ПОЛОЖЕНИЕ ГРАНИЦЫ И ТЕМПЕРАТУРНОЕ РАСПРЕДЕЛЕНИЕ В АРХИВ"
+            #       f" data/small_crack/f_and_temp_at_{t_step}.npz ###")
+            # np.savez_compressed(f"data/small_crack/f_and_temp_at_{t_step}", F=F_new, T=T_new)
 
         t_step = t_step + 1
 
+    # np.savez_compressed("data/result", num=result)
+    # print(result)
     print("### РАСЧЁТ ЗАВЕРШЁН ###")

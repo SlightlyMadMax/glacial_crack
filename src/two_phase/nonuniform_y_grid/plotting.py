@@ -33,10 +33,12 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
             else:
                 Y[j, i] = (Y[j, i] - 1.0) * (H - F[i]) + F[i]
 
+
+    plt.rcParams.update({'font.size': 12})
     fig = plt.figure()
     ax = plt.axes()
 
-    # ax.set_aspect("equal")
+    ax.set_aspect("equal")
     # plt.plot(X, Y, marker=".", markersize=0.5, color='k', linestyle='none')  # сетка
     plt.plot(X[j_int, :], Y[j_int, :], linewidth=1, color='r', label='Граница ф.п.')  # граница ф.п.
     # plt.legend(loc="upper right")
@@ -45,9 +47,7 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
     # plt.ylim((9.9, 10.05))
     # plt.xlim((0.3, 0.7))
 
-
     plt.colorbar()
-    # plt.clim(-5, 5)
 
     # if non_uniform:
     #     title = f"time = {time} h, T_air = {round(air_temperature(graph_id * dt * t_0) - 273.15, 2)} C, " \
@@ -60,8 +60,9 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
     ax.set_xlabel("x, м")
     ax.set_ylabel("y, м")
 
-    plt.savefig(f"graphs/temperature/T_{graph_id}.eps", format="eps")  # сохранить в векторном формате
+    # plt.savefig(f"graphs/temperature/T_{graph_id}.eps", format="eps")  # сохранить в векторном формате
     plt.savefig(f"graphs/temperature/T_{graph_id}.png")  # сохранить в растровом формате
+    # plt.savefig(f"graphs/temperature/T_{graph_id}.tiff", dpi=320, format='tiff')  # сохранить в высоком разрешении
 
     # ax.set_aspect("equal")
     #
@@ -75,5 +76,5 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
     #
     # plt.savefig(f"graphs/temperature/left_water_{graph_id}.png")
 
-    # plt.show()
-    plt.close()
+    plt.show()
+    # plt.close()

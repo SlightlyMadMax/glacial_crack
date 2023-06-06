@@ -19,7 +19,7 @@ def tdma(
     :param psi: значение функции для условия 3-го рода
     :param h: шаг по координате (для условий 2-го и 3-го рода)
     :param condition_type: тип граничного условия (1, 2, 3)
-    :return: решение СЛАУ с заданными условиями
+    :return: решение СЛАУ с заданными параметрами
     """
     n = len(f)
     alpha = np.zeros(n - 1)
@@ -30,6 +30,7 @@ def tdma(
     alpha[0] = alpha_0
     beta[0] = beta_0
 
+    # Определение прогоночных коэффициентов
     for j in range(1, n - 1):
         alpha[j] = -a[j] / (b[j] + c[j] * alpha[j - 1])
         beta[j] = (f[j] - c[j] * beta[j - 1]) / (b[j] + c[j] * alpha[j - 1])
@@ -42,6 +43,7 @@ def tdma(
     else:
         u[n - 1] = (h*psi + beta[n - 2])/(1 - alpha[n - 2] - h*phi)
 
+    # Прогонка
     for j in range(n - 2, -1, -1):
         u[j] = alpha[j] * u[j + 1] + beta[j]
 

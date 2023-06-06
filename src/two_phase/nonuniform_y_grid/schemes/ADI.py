@@ -3,11 +3,20 @@ from linear_algebra.tdma import tdma
 from two_phase.nonuniform_y_grid.temperature import air_temperature
 import numpy as np
 import numba
-from two_phase.nonuniform_y_grid.plotting import plot_non_transformed
 
 
 @numba.jit
 def find_rhs(T, F_new, F_old, Y, j: int, i: int, chi: float):
+    """
+    :param T: двумерный массив со значениями температуры
+    :param F_new: вектор с координатами границы фазового перехода на новом временном шаге
+    :param F_old: вектор с координатами границы фазового перехода на текущем временном шаге
+    :param Y: вектор с координатами Y на неравномерной сетке
+    :param j: номер шага по координате y
+    :param i: номер шага по координате x
+    :param chi: коэффициент для уравнения теплопроводности в воде
+    :return: правая часть на первом шаге метода переменных направлений
+    """
     inv_F = 1.0 / F_new[i]
     inv_FH = 1.0 / (H - F_new[i])
     inv_dx = 1.0 / dx
@@ -63,7 +72,6 @@ def find_rhs(T, F_new, F_old, Y, j: int, i: int, chi: float):
 
         d_y = (T[j + 1, i] * h_0 * h_0 - T[j - 1, i] * h * h + T[j, i] * (h * h - h_0 * h_0))/(h * h_0 * (h + h_0))
 
-        # TODO: second order for d_xy
         d_xy = (T[j + 1, i + 1] - T[j + 1, i - 1] - T[j - 1, i + 1] + T[j - 1, i - 1]) / (dx * h_2)
 
     if j <= j_int:
@@ -85,6 +93,15 @@ def find_rhs(T, F_new, F_old, Y, j: int, i: int, chi: float):
 
 @numba.jit
 def solve(T, F_new, F_old, Y, time: float):
+    """
+    Вычисляет температурное распределение на новом шаге по времени с помощью метода переменных направлений
+    :param T: двумерный массив со значениями температуры
+    :param F_new: вектор с координатами границы фазового перехода на новом временном шаге
+    :param F_old: вектор с координатами границы фазового перехода на текущем временном шаге
+    :param Y: вектор с координатами Y на неравномерной сетке
+    :param time: текущее модельное время
+    :return: двумерный массив со значениями температуры на новом шаге по времени
+    """
     temp_T = np.copy(T)
     new_T = np.copy(T)
     j_int = int(0.5 * (N_Y - 1))
@@ -121,7 +138,7 @@ def solve(T, F_new, F_old, Y, time: float):
         chi = (c_w * rho_w * k_ice) / (c_ice * rho_ice * k_w)
         rhs[N_Y-1] = find_rhs(T, F_new, F_old, Y, N_Y-1, i, chi)
 
-        # ПРОГОНКА ДЛЯ ЛЬДА (первый шаг метода переменных направлений)
+        # Прогонка для льда, первый шаг метода переменных направлений
         temp_T[0:j_int + 1, i] = tdma(
             alpha_0=0.0,  # Из левого граничного условия по y (1-го рода)
             beta_0=T_ice / T_0,  # Из левого граничного условия по y (1-го рода)
@@ -133,16 +150,9 @@ def solve(T, F_new, F_old, Y, time: float):
             f=rhs[0:j_int + 1]
         )
 
-        # h = Y[j_int+1] - 1.0
-        # h_0 = 1.0
-        # sigma_j = W * W * inv_FH * inv_FH + 0.25 * inv_FH * inv_dx * df_dx * inv_FH * inv_dx * df_dx
-        # a_y[j_int] = -2.0 * dt * sigma_j / (chi * (h * (h + h_0)))
-        # c_y[j_int] = -2.0 * dt * sigma_j / (chi * (h_0 * (h + h_0)))
-        # b_y[j_int] = 1.0 + 2.0 * dt * sigma_j / (chi * (h * h_0))
-
         rhs[j_int] = find_rhs(T, F_new, F_old, Y, j_int, i, chi)
 
-        # ПРОГОНКА ДЛЯ ВОДЫ (первый шаг метода переменных направлений)
+        # Прогонка для воды, первый шаг метода переменных направлений
         temp_T[j_int:N_Y, i] = tdma(
             alpha_0=0.0,  # Из левого граничного условия по y (1-го рода)
             beta_0=T_0 / T_0,  # Из левого граничного условия по y (1-го рода)
@@ -154,13 +164,7 @@ def solve(T, F_new, F_old, Y, time: float):
             f=rhs[j_int:N_Y]
         )
 
-    # plot_non_transformed(
-    #     T=temp_T,
-    #     F=F_new,
-    #     time=1,
-    #     graph_id=1
-    # )
-
+    # Второй шаг метода переменных направлений
     rhs = np.empty(N_X,)
     for j in range(1, N_Y - 1):
         inv_chi = 1.0 if j <= j_int else (c_ice * rho_ice * k_w) / (c_w * rho_w * k_ice)
@@ -174,8 +178,10 @@ def solve(T, F_new, F_old, Y, time: float):
             else:
                 d_xx = T[j, i + 1] - 2.0 * T[j, i] + T[j, i - 1]
 
+            # Вычисление правой части
             rhs[i] = temp_T[j, i] - dt * inv_dx * inv_dx * d_xx * inv_chi
 
+        # Прогонка
         new_T[j, :] = tdma(
             alpha_0=1.0,  # Из левого граничного условия по x (2-го рода)
             beta_0=0.0,  # Из левого граничного условия по x
@@ -186,12 +192,5 @@ def solve(T, F_new, F_old, Y, time: float):
             c=c,
             f=rhs
         )
-
-    # plot_non_transformed(
-    #     T=new_T,
-    #     F=F_new,
-    #     time=2,
-    #     graph_id=2
-    # )
 
     return new_T

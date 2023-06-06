@@ -40,10 +40,10 @@ plt.plot(ts, boundary(ts), 'k', lw=0.5, label='Полуэмпирическая 
 plt.legend()
 plt.ylim(s0, s0+0.13)
 plt.xlim(0, 36)
-plt.ylabel('d, m')
+plt.ylabel('d, м')
 plt.xlabel('t, дни')
-plt.savefig('../../graphs/comparison/two_phase/1d.png')
-plt.savefig('../../graphs/comparison/two_phase/1d.eps', format="eps")
+plt.savefig('../../graphs/1d1p.png')
+# plt.savefig('../../graphs/comparison/two_phase/1d.eps', format="eps")
 plt.show()
 
 # plt.clf()
