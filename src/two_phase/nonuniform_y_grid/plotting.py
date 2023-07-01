@@ -60,7 +60,7 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
     ax.set_xlabel("x, м")
     ax.set_ylabel("y, м")
 
-    plt.savefig(f"graphs/temperature/T_{graph_id}.eps", format="eps")  # сохранить в векторном формате
+    # plt.savefig(f"graphs/temperature/T_{graph_id}.eps", format="eps")  # сохранить в векторном формате
     plt.savefig(f"graphs/temperature/T_{graph_id}.png")  # сохранить в растровом формате
 
     # ax.set_aspect("equal")
@@ -75,5 +75,5 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
     #
     # plt.savefig(f"graphs/temperature/left_water_{graph_id}.png")
 
-    # plt.show()
-    plt.close()
+    plt.show()
+    # plt.close()

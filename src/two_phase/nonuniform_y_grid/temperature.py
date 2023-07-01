@@ -12,8 +12,8 @@ def air_temperature(t: float):
     :param t: Время в секундах
     :return: Температура на поверхности в заданный момент времени
     """
-    # return T_air
-    return T_air + T_amp * math.sin(2 * math.pi * t / (24.0 * 3600.0) - math.pi / 2)
+    return T_air
+    # return T_air + T_amp * math.sin(2 * math.pi * t / (24.0 * 3600.0) - math.pi / 2)
 
 
 def init_temperature(F):

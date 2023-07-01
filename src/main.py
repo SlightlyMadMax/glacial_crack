@@ -26,7 +26,7 @@ if __name__ == '__main__':
         graph_id=0
     )
 
-    np.savez_compressed("data/f_and_temp_at_0", F=F, T=T)
+    # np.savez_compressed("data/f_and_temp_at_0", F=F, T=T)
 
     # Инициализируем переменные для температуры и положения свободной границы на новом шаге по времени
     T_new = np.copy(T)
@@ -60,7 +60,12 @@ if __name__ == '__main__':
                 Y=Y,
                 time=t_step * dt * t_0
             )
-            F_new = recalculate_boundary(F=F_old, T=T_new)
+            # F_new = recalculate_boundary(F=F_old, T=T_new)
+            F_new = recalculate_boundary(
+                F=F_old,
+                F_2=F_old if k == 0 else F_new,
+                T=T_new
+            )
 
         if np.amax(F_new) >= H or np.amin(F_new) <= 0:
             print("### ФАЗОВЫЙ ПЕРЕХОД ДОШЕЛ ДО ГРАНИЦЫ ОБЛАСТИ ###")
@@ -70,7 +75,7 @@ if __name__ == '__main__':
         F_old = np.copy(F_new)
 
         # print("### ТЕМПЕРАТУРА НА НОВОМ ШАГЕ РАССЧИТАНА ###")
-        if t_step % 7200 == 0:
+        if t_step % 360 == 0:
             print(f"### ВРЕМЯ ВЫПОЛНЕНИЯ: {time.process_time() - start_time} ###")
 
             model_time = round(t_step * dt * t_0 / 3600.0, 2)
@@ -83,9 +88,9 @@ if __name__ == '__main__':
                 graph_id=t_step
             )
 
-            print(f"### СОХРАНЯЮ ПОЛОЖЕНИЕ ГРАНИЦЫ И ТЕМПЕРАТУРНОЕ РАСПРЕДЕЛЕНИЕ В АРХИВ"
-                  f" data/f_and_temp_at_{t_step}.npz ###")
-            np.savez_compressed(f"data/f_and_temp_at_{t_step}", F=F_new, T=T_new)
+            # print(f"### СОХРАНЯЮ ПОЛОЖЕНИЕ ГРАНИЦЫ И ТЕМПЕРАТУРНОЕ РАСПРЕДЕЛЕНИЕ В АРХИВ"
+            #       f" data/f_and_temp_at_{t_step}.npz ###")
+            # np.savez_compressed(f"data/f_and_temp_at_{t_step}", F=F_new, T=T_new)
 
         t_step = t_step + 1
 
