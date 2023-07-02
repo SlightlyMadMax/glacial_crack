@@ -18,6 +18,8 @@ if __name__ == '__main__':
     # Начальное распределение температуры в НОВЫХ координатах
     T = init_temperature(F)
 
+    # T = np.load("data/analytical.npz")['T']
+
     # График начального распределения температуры (в исходных координатах)
     plot_non_transformed(
         T=T,
@@ -42,10 +44,18 @@ if __name__ == '__main__':
         Y[j] = get_node_coord(j, j_int)
         # print(Y[j])
 
+    # dif_y = np.empty(N_Y-1)
+    # for j in range(1, N_Y-1):
+    #     dif_y[j] = abs(Y[j] - Y[j-1])
+    #
+    # print(dif_y)
+
     t_step = 1  # Номер шага по времени
     K = 2  # Число итераций на одном шаге
 
     start_time = time.process_time()  # Начальное время расчетов
+
+    result = []
 
     while t_step < N_t:
         # print("### ВЫЧИСЛЯЮ ПОЛОЖЕНИЕ ГРАНИЦЫ, ШАГ = " + str(t_step) + " ###")
@@ -75,12 +85,15 @@ if __name__ == '__main__':
         F_old = np.copy(F_new)
 
         # print("### ТЕМПЕРАТУРА НА НОВОМ ШАГЕ РАССЧИТАНА ###")
-        if t_step % 360 == 0:
+        if t_step % 60 == 0:
             print(f"### ВРЕМЯ ВЫПОЛНЕНИЯ: {time.process_time() - start_time} ###")
-
+            print(f"ШАГ: {t_step}")
             model_time = round(t_step * dt * t_0 / 3600.0, 2)
 
-            print("### СОХРАНЯЮ ГРАФИК ###")
+            # print(F_new[15])
+            # result.append(F_new[15])
+
+            # print("### СОХРАНЯЮ ГРАФИК ###")
             plot_non_transformed(
                 T=T_new,
                 F=F_new,
@@ -94,4 +107,6 @@ if __name__ == '__main__':
 
         t_step = t_step + 1
 
+    # np.savez_compressed(f"data/result.npz", num=result)
+    print(F_new[15])
     print("### РАСЧЁТ ЗАВЕРШЁН ###")

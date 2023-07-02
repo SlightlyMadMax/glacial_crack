@@ -1,4 +1,4 @@
-from parameters import W, H, N_X, N_Y, dt, t_0, T_0
+from parameters import W, H, N_X, N_Y, dt, t_0, T_0, conv_coef, k_w
 import matplotlib.pyplot as plt
 import numpy as np
 from two_phase.nonuniform_y_grid.grid_generation import get_node_coord
@@ -55,8 +55,10 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
     # else:
     #     title = f"time = {time} h\n dx = 1/{N_X} m, dy = 1/{N_Y} m, dt = {round(dt * t_0 / 3600.0, 2)} h"
     #
-    # title = f"Распределение температуры, °C,\ntime = {time} h, T_air = {round(air_temperature(graph_id * dt * t_0) - 273.15, 2)} C."
-    # ax.set_title(title)
+
+    title = f"Time = {time} h, T_air = {round(air_temperature(graph_id * dt * t_0) - 273.15, 2)} C,\n" \
+            f"Heat transfer coef = {round(conv_coef*k_w)} W / (K * m^2)"
+    ax.set_title(title)
     ax.set_xlabel("x, м")
     ax.set_ylabel("y, м")
 
