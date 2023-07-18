@@ -67,19 +67,20 @@ if __name__ == '__main__':
             # F_new = recalculate_boundary(F=F_old, T=T_new)
             F_new = recalculate_boundary(
                 F=F_old,
-                F_2=F_old if k == 0 else F_new,
+                # F_2=F_old if k == 0 else F_new,
                 T=T_new
             )
 
         if np.amax(F_new) >= H or np.amin(F_new) <= 0:
             print("### ФАЗОВЫЙ ПЕРЕХОД ДОШЕЛ ДО ГРАНИЦЫ ОБЛАСТИ ###")
+            print(f"ШАГ: {t_step}")
             break
 
         T_old = np.copy(T_new)
         F_old = np.copy(F_new)
 
         # print("### ТЕМПЕРАТУРА НА НОВОМ ШАГЕ РАССЧИТАНА ###")
-        if t_step % 60 == 0:
+        if t_step % 720 == 0:
             print(f"### ВРЕМЯ ВЫПОЛНЕНИЯ: {time.process_time() - start_time} ###")
             print(f"ШАГ: {t_step}")
             model_time = round(t_step * dt * t_0 / 3600.0, 2)

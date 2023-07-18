@@ -133,13 +133,6 @@ def solve(T, F_new, F_old, Y, time: float):
             f=rhs[0:j_int + 1]
         )
 
-        # h = Y[j_int+1] - 1.0
-        # h_0 = 1.0
-        # sigma_j = W * W * inv_FH * inv_FH + 0.25 * inv_FH * inv_dx * df_dx * inv_FH * inv_dx * df_dx
-        # a_y[j_int] = -2.0 * dt * sigma_j / (chi * (h * (h + h_0)))
-        # c_y[j_int] = -2.0 * dt * sigma_j / (chi * (h_0 * (h + h_0)))
-        # b_y[j_int] = 1.0 + 2.0 * dt * sigma_j / (chi * (h * h_0))
-
         rhs[j_int] = find_rhs(T, F_new, F_old, Y, j_int, i, chi)
 
         # ПРОГОНКА ДЛЯ ВОДЫ (первый шаг метода переменных направлений)
@@ -155,13 +148,6 @@ def solve(T, F_new, F_old, Y, time: float):
             c=c_y[j_int:N_Y-1],
             f=rhs[j_int:N_Y]
         )
-
-    # plot_non_transformed(
-    #     T=temp_T,
-    #     F=F_new,
-    #     time=1,
-    #     graph_id=1
-    # )
 
     rhs = np.empty(N_X,)
     for j in range(1, N_Y - 1):
@@ -188,12 +174,5 @@ def solve(T, F_new, F_old, Y, time: float):
             c=c,
             f=rhs
         )
-
-    # plot_non_transformed(
-    #     T=new_T,
-    #     F=F_new,
-    #     time=2,
-    #     graph_id=2
-    # )
 
     return new_T
