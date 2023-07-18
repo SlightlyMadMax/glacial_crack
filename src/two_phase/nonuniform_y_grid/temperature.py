@@ -16,15 +16,6 @@ def air_temperature(t: float):
     return T_air + T_amp * math.sin(2 * math.pi * t / (24.0 * 3600.0) - math.pi / 2)
 
 
-def air_flux(t: float):
-    """
-    Функция потока тепла от окружающей среды и солнца
-    :param t: Время в секундах
-    :return: Тепловой поток на поверхности в заданный момент времени
-    """
-    return
-
-
 def init_temperature(F):
     """
     Задает начальное распределение температуры на сетке в НОВЫХ координатах.

@@ -44,12 +44,6 @@ if __name__ == '__main__':
         Y[j] = get_node_coord(j, j_int)
         # print(Y[j])
 
-    # dif_y = np.empty(N_Y-1)
-    # for j in range(1, N_Y-1):
-    #     dif_y[j] = abs(Y[j] - Y[j-1])
-    #
-    # print(dif_y)
-
     t_step = 1  # Номер шага по времени
     K = 2  # Число итераций на одном шаге
 
@@ -108,5 +102,5 @@ if __name__ == '__main__':
         t_step = t_step + 1
 
     # np.savez_compressed(f"data/result.npz", num=result)
-    print(F_new[15])
+    # print(F_new[15])
     print("### РАСЧЁТ ЗАВЕРШЁН ###")

@@ -42,7 +42,7 @@ def find_rhs(T, F_new, F_old, theta: float, j: int, i: int):
     rhs = T[j, i] + \
         dt * ((1.0 - theta) * sigma * d_yy * inv_dy * inv_dy +
               d_xx * inv_dx * inv_dx +
-              0.5 * zeta * d_xy * inv_dx * inv_dy +
+              0.25 * zeta * d_xy * inv_dx * inv_dy +
               0.5 * kappa * d_y * inv_dy)
 
     return rhs

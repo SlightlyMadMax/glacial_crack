@@ -50,7 +50,7 @@ def find_rhs(T, F_new, F_old, f: float, j: int, i: int):
     return T[j, i] + \
           (1.0 / f + 0.5 * dt * sigma * inv_dy * inv_dy) * d_yy + \
           d_xx * dt * inv_dx * inv_dx + \
-          0.5 * zeta * d_xy * dt * inv_dx * inv_dy + \
+          0.25 * zeta * d_xy * dt * inv_dx * inv_dy + \
           0.5 * kappa * d_y * dt * inv_dy + \
           (1.0 + sigma) * d_xx_yy * dt * inv_dx * inv_dy
 
