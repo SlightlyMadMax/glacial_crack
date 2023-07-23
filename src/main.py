@@ -21,14 +21,14 @@ if __name__ == '__main__':
     # T = np.load("data/analytical.npz")['T']
 
     # График начального распределения температуры (в исходных координатах)
-    plot_non_transformed(
-        T=T,
-        F=F,
-        time=0,
-        graph_id=0
-    )
+    # plot_non_transformed(
+    #     T=T,
+    #     F=F,
+    #     time=0,
+    #     graph_id=0
+    # )
 
-    # np.savez_compressed("data/f_and_temp_at_0", F=F, T=T)
+    np.savez_compressed("data/f_and_temp_at_0", F=F, T=T)
 
     # Инициализируем переменные для температуры и положения свободной границы на новом шаге по времени
     T_new = np.copy(T)
@@ -52,9 +52,6 @@ if __name__ == '__main__':
     result = []
 
     while t_step < N_t:
-        # print("### ВЫЧИСЛЯЮ ПОЛОЖЕНИЕ ГРАНИЦЫ, ШАГ = " + str(t_step) + " ###")
-        # print("### ВЫЧИСЛЯЮ ТЕМПЕРАТУРУ, ШАГ = " + str(t_step) + " ###")
-
         # Итерационный метод
         for k in range(K):
             T_new = solve(
@@ -64,10 +61,9 @@ if __name__ == '__main__':
                 Y=Y,
                 time=t_step * dt * t_0
             )
-            # F_new = recalculate_boundary(F=F_old, T=T_new)
             F_new = recalculate_boundary(
                 F=F_old,
-                # F_2=F_old if k == 0 else F_new,
+                F_2=F_old if k == 0 else F_new,
                 T=T_new
             )
 
@@ -80,28 +76,23 @@ if __name__ == '__main__':
         F_old = np.copy(F_new)
 
         # print("### ТЕМПЕРАТУРА НА НОВОМ ШАГЕ РАССЧИТАНА ###")
-        if t_step % 720 == 0:
+        if t_step % 6200 == 0:
             print(f"### ВРЕМЯ ВЫПОЛНЕНИЯ: {time.process_time() - start_time} ###")
             print(f"ШАГ: {t_step}")
             model_time = round(t_step * dt * t_0 / 3600.0, 2)
 
-            # print(F_new[15])
-            # result.append(F_new[15])
-
             # print("### СОХРАНЯЮ ГРАФИК ###")
-            plot_non_transformed(
-                T=T_new,
-                F=F_new,
-                time=model_time,
-                graph_id=t_step
-            )
+            # plot_non_transformed(
+            #     T=T_new,
+            #     F=F_new,
+            #     time=model_time,
+            #     graph_id=t_step
+            # )
 
-            # print(f"### СОХРАНЯЮ ПОЛОЖЕНИЕ ГРАНИЦЫ И ТЕМПЕРАТУРНОЕ РАСПРЕДЕЛЕНИЕ В АРХИВ"
-            #       f" data/f_and_temp_at_{t_step}.npz ###")
-            # np.savez_compressed(f"data/f_and_temp_at_{t_step}", F=F_new, T=T_new)
+            print(f"### СОХРАНЯЮ ПОЛОЖЕНИЕ ГРАНИЦЫ И ТЕМПЕРАТУРНОЕ РАСПРЕДЕЛЕНИЕ В АРХИВ"
+                  f" data/f_and_temp_at_{t_step}.npz ###")
+            np.savez_compressed(f"data/f_and_temp_at_{t_step}", F=F_new, T=T_new)
 
         t_step = t_step + 1
 
-    # np.savez_compressed(f"data/result.npz", num=result)
-    # print(F_new[15])
     print("### РАСЧЁТ ЗАВЕРШЁН ###")

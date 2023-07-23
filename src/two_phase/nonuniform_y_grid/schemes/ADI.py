@@ -3,7 +3,6 @@ from linear_algebra.tdma import tdma
 from two_phase.nonuniform_y_grid.temperature import air_temperature
 import numpy as np
 import numba
-from two_phase.nonuniform_y_grid.plotting import plot_non_transformed
 
 
 @numba.jit
