@@ -23,13 +23,13 @@ if __name__ == '__main__':
     path = f"graphs/temperature/H={H}_NX={N_X}_NY={N_Y}_dt={round(dt*t_0)}_conv={round(conv_coef*k_w)}"
 
     # График начального распределения температуры (в исходных координатах)
-    plot_non_transformed(
-        T=T,
-        F=F,
-        time=0,
-        graph_id=0,
-        path=path
-    )
+    # plot_non_transformed(
+    #     T=T,
+    #     F=F,
+    #     time=0,
+    #     graph_id=0,
+    #     path=path
+    # )
 
     np.savez_compressed("data/f_and_temp_at_0", F=F, T=T)
 
@@ -84,14 +84,14 @@ if __name__ == '__main__':
             print(f"ШАГ: {t_step}")
             model_time = round(t_step * dt * t_0 / 3600.0, 2)
 
-            print("### СОХРАНЯЮ ГРАФИК ###")
-            plot_non_transformed(
-                T=T_new,
-                F=F_new,
-                time=model_time,
-                graph_id=t_step,
-                path=path
-            )
+            # print("### СОХРАНЯЮ ГРАФИК ###")
+            # plot_non_transformed(
+            #     T=T_new,
+            #     F=F_new,
+            #     time=model_time,
+            #     graph_id=t_step,
+            #     path=path
+            # )
 
             print(f"### СОХРАНЯЮ ПОЛОЖЕНИЕ ГРАНИЦЫ И ТЕМПЕРАТУРНОЕ РАСПРЕДЕЛЕНИЕ В АРХИВ"
                   f" data/f_and_temp_at_{t_step}.npz ###")
