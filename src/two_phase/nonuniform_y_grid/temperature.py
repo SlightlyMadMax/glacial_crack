@@ -1,7 +1,7 @@
 import numpy as np
-import math
 import numba
 from parameters import *
+from math import sin, cos, pi
 from two_phase.nonuniform_y_grid.grid_generation import get_node_coord
 
 
@@ -13,7 +13,12 @@ def air_temperature(t: float):
     :return: Температура на поверхности в заданный момент времени
     """
     # return T_air
-    return T_air + T_amp * math.sin(2 * math.pi * t / (24.0 * 3600.0) - math.pi / 2)
+    return T_air + T_amp * sin(2 * pi * t / (24.0 * 3600.0) - pi / 2)
+
+
+@numba.jit
+def solar_heat(t: float):
+    return Q_s * (sin(latitude)*sin(declination) + cos(latitude)*cos(declination)*cos(rad_speed*t + 12.0*3600.0))
 
 
 def init_temperature(F):

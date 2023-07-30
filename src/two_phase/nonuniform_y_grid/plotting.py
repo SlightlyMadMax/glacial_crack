@@ -59,7 +59,7 @@ def plot_non_transformed(T, F, time: float, graph_id: int, path: str, non_unifor
     #
 
     title = f"Time = {time} h, T_air = {round(air_temperature(graph_id * dt * t_0) - 273.15, 2)} C,\n" \
-            f"Heat transfer coef = {round(conv_coef*k_w)} W / (K * m^2)"
+            f"Heat transfer coef = {round(conv_coef)} W / (K * m^2)"
     ax.set_title(title)
     ax.set_xlabel("x, м")
     ax.set_ylabel("y, м")
@@ -74,8 +74,8 @@ def plot_non_transformed(T, F, time: float, graph_id: int, path: str, non_unifor
 
     # ax.set_aspect("equal")
     #
-    # plt.ylim((9.90, 10.05))
-    # plt.xlim((0.3, 0.7))
+    plt.ylim((3, 6.05))
+    plt.xlim((0.3, 0.7))
     #
     # plt.savefig(f"graphs/temperature/above_water_{graph_id}.png")
     #

@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-N_X = 1000
-N_Y = 250
+N_X = 800
+N_Y = 200
 s_w = 4.5
 s_ice = 8.0
 T_0 = 273.15
@@ -48,7 +48,7 @@ ax = plt.axes()
 
 # ax.set_aspect("equal")
 
-for i in range(0, 57601, 1440):
+for i in range(0, 63361, 720):
     X, Y = np.meshgrid(x, y)
     loaded_data = np.load(f'../../data/f_and_temp_at_{i}.npz')
     F = loaded_data['F']
@@ -70,4 +70,4 @@ plt.xlim((0.3, 0.7))
 
 plt.ylabel('x, м')
 plt.xlabel('y, м')
-plt.savefig('../../graphs/t2.png')
+plt.savefig('../../graphs/t.png')

@@ -1,6 +1,6 @@
 from two_phase.nonuniform_y_grid.schemes.ADI import solve
 from two_phase.nonuniform_y_grid.boundary import init_f_vector, recalculate_boundary
-from two_phase.nonuniform_y_grid.temperature import init_temperature
+from two_phase.nonuniform_y_grid.temperature import init_temperature, solar_heat, air_temperature
 from two_phase.nonuniform_y_grid.plotting import plot_non_transformed
 from two_phase.nonuniform_y_grid.grid_generation import get_node_coord
 from parameters import *
@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     # T = np.load("data/analytical.npz")['T']
 
-    path = f"graphs/temperature/H={H}_NX={N_X}_NY={N_Y}_dt={round(dt*t_0)}_conv={round(conv_coef*k_w)}"
+    path = f"graphs/temperature/H={H}_NX={N_X}_NY={N_Y}_dt={round(dt*t_0)}_conv={round(conv_coef)}"
 
     # График начального распределения температуры (в исходных координатах)
     # plot_non_transformed(
@@ -66,7 +66,6 @@ if __name__ == '__main__':
             )
             F_new = recalculate_boundary(
                 F=F_old,
-                F_2=F_old if k == 0 else F_new,
                 T=T_new
             )
 
@@ -84,14 +83,16 @@ if __name__ == '__main__':
             print(f"ШАГ: {t_step}")
             model_time = round(t_step * dt * t_0 / 3600.0, 2)
 
-            # print("### СОХРАНЯЮ ГРАФИК ###")
-            # plot_non_transformed(
-            #     T=T_new,
-            #     F=F_new,
-            #     time=model_time,
-            #     graph_id=t_step,
-            #     path=path
-            # )
+            # if t_step * 5 / 3600 < 26:
+            #     print(f"T_air = {air_temperature(t_step * dt * t_0)}, Q_sol = {solar_heat(t_step * dt * t_0)}")
+            #     print("### СОХРАНЯЮ ГРАФИК ###")
+            #     plot_non_transformed(
+            #         T=T_new,
+            #         F=F_new,
+            #         time=model_time,
+            #         graph_id=t_step,
+            #         path=path
+            #     )
 
             print(f"### СОХРАНЯЮ ПОЛОЖЕНИЕ ГРАНИЦЫ И ТЕМПЕРАТУРНОЕ РАСПРЕДЕЛЕНИЕ В АРХИВ"
                   f" data/f_and_temp_at_{t_step}.npz ###")

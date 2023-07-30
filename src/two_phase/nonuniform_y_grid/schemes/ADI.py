@@ -1,6 +1,7 @@
 from parameters import *
 from linear_algebra.tdma import tdma
 from two_phase.nonuniform_y_grid.temperature import air_temperature
+from two_phase.nonuniform_y_grid.temperature import solar_heat
 import numpy as np
 import numba
 
@@ -95,6 +96,8 @@ def solve(T, F_new, F_old, Y, time: float):
 
     T_air_t = air_temperature(time)
 
+    Q_sol = solar_heat(time)
+
     rhs = np.empty(N_Y,)
     for i in range(1, N_X - 1):
         inv_F = 1.0 / F_new[i]
@@ -132,6 +135,13 @@ def solve(T, F_new, F_old, Y, time: float):
             f=rhs[0:j_int + 1]
         )
 
+        h = Y[j_int+1] - 1.0
+        h_0 = 1.0
+        sigma_j = W * W * inv_FH * inv_FH + 0.25 * inv_FH * inv_dx * df_dx * inv_FH * inv_dx * df_dx
+        a_y[j_int] = -2.0 * dt * sigma_j / (chi * (h * (h + h_0)))
+        c_y[j_int] = -2.0 * dt * sigma_j / (chi * (h_0 * (h + h_0)))
+        b_y[j_int] = 1.0 + 2.0 * dt * sigma_j / (chi * (h * h_0))
+
         rhs[j_int] = find_rhs(T, F_new, F_old, Y, j_int, i, chi)
 
         # ПРОГОНКА ДЛЯ ВОДЫ (первый шаг метода переменных направлений)
@@ -139,8 +149,8 @@ def solve(T, F_new, F_old, Y, time: float):
             alpha_0=0.0,  # Из левого граничного условия по y (1-го рода)
             beta_0=T_0 / T_0,  # Из левого граничного условия по y (1-го рода)
             condition_type=3,
-            phi=-conv_coef * (H - F_new[i]),  # правое граничное условие
-            psi=conv_coef * (H - F_new[i]) * T_air_t / T_0,
+            phi=-conv_coef * (H - F_new[i]) / k_w,  # правое граничное условие
+            psi=(H - F_new[i]) * (conv_coef * T_air_t + Q_sol) / (T_0 * k_w),
             h=(Y[N_Y-1]-Y[N_Y-2]),
             a=a_y[j_int:N_Y-1],
             b=b_y[j_int:N_Y-1],
