@@ -1,3 +1,5 @@
+import os
+
 from parameters import W, H, N_X, N_Y, dt, t_0, T_0, conv_coef, k_w
 import matplotlib.pyplot as plt
 import numpy as np
@@ -5,7 +7,7 @@ from two_phase.nonuniform_y_grid.grid_generation import get_node_coord
 from two_phase.nonuniform_y_grid.temperature import air_temperature
 
 
-def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = True):
+def plot_non_transformed(T, F, time: float, graph_id: int, path: str, non_uniform: bool = True):
     """
     Строит график по двумерному массиву температуры, заданному в НОВЫХ координатах.
     Осуществляет перевод в исходные координаты, построение и сохранение графика.
@@ -62,8 +64,13 @@ def plot_non_transformed(T, F, time: float, graph_id: int, non_uniform: bool = T
     ax.set_xlabel("x, м")
     ax.set_ylabel("y, м")
 
+    try:
+        os.mkdir(path)
+    except FileExistsError:
+        pass
+
     # plt.savefig(f"graphs/temperature/T_{graph_id}.eps", format="eps")  # сохранить в векторном формате
-    plt.savefig(f"graphs/temperature/T_{graph_id}.png")  # сохранить в растровом формате
+    plt.savefig(f"{path}/T_{graph_id}.png")  # сохранить в растровом формате
 
     # ax.set_aspect("equal")
     #

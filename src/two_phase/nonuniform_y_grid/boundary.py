@@ -29,7 +29,7 @@ def init_f_vector(n_x):
     # F[:] = [0.8 - i*dx if i*dx < 0.5 else i*dx - 0.2 for i in range(n_x)]
 
     # Для теста
-    # F[:] = [1.0 - 0.7 * math.exp(-(i * dx - 0.5) ** 2 / 0.01) for i in range(n_x)]
+    # F[:] = [3.0 - 1.5 * math.exp(-(i * dx - 0.5) ** 2 / 0.01) for i in range(n_x)]
 
     # Трещина-гауссиана
     F[:] = [10.0 - 5.0 * math.exp(-(i * dx - 0.5) ** 2 / 0.001) for i in range(n_x)]

@@ -139,8 +139,8 @@ def solve(T, F_new, F_old, Y, time: float):
             alpha_0=0.0,  # Из левого граничного условия по y (1-го рода)
             beta_0=T_0 / T_0,  # Из левого граничного условия по y (1-го рода)
             condition_type=3,
-            phi=-conv_coef,  # правое граничное условие
-            psi=conv_coef * T_air_t / T_0,
+            phi=-conv_coef * (H - F_new[i]),  # правое граничное условие
+            psi=conv_coef * (H - F_new[i]) * T_air_t / T_0,
             h=(Y[N_Y-1]-Y[N_Y-2]),
             a=a_y[j_int:N_Y-1],
             b=b_y[j_int:N_Y-1],
